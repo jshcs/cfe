@@ -17,7 +17,7 @@ def read_sorted_file_into_array(filename):
 	f=open(filename,'r')
 	for line in f:
 		if line[:-1]!="":
-			res.append(line[:-1].lower())
+			res.append(line[:-1])
 		#print line[:-1]
 	return res
 
@@ -26,7 +26,7 @@ def read_file_into_array(filename):
 	f=open(filename,'r')
 	for line in f:
 		if line[:-1]!="":
-			res.append(line[:-1].lower())
+			res.append(line[:-1])
 		#print line[:-1]
 	return list(set(res))
 
