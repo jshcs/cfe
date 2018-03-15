@@ -24,6 +24,15 @@ class Features():
 	def ends_with_period(self):
 		self.features["ends_with_period"]=self.token[-1]=='.'
 
+	def enclosed_brackets(self):
+		if self.token[0] in BRACKETS:
+			if self.token[-1]==BRACKETS[self.token[0]]:
+				self.features["enclosed_brackets"]=True
+			else:
+				self.features["enclosed_brackets"]=False
+		else:
+			self.features["enclosed_brackets"]=False
+
 	def first_name_lexicon(self):
 		arr=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
 		start=0
@@ -43,6 +52,7 @@ class Features():
 		self.word_length()
 		self.is_number()
 		self.ends_with_period()
+		self.enclosed_brackets()
 		self.first_name_lexicon()
 		self.last_name_lexicon()
 		return self.features
