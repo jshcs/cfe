@@ -9,6 +9,9 @@ class Features():
 	def is_all_caps(self):
 		self.features["is_all_caps"]=self.token.isupper()
 
+	def is_capitalized(self):
+		self.features["is_capitalized"]=self.token[0].isupper()
+
 	def is_alpha_num(self):
 		self.features["is_alpha_num"]=self.token.isalnum()
 
@@ -35,6 +38,7 @@ class Features():
 
 	def get_features(self):
 		self.is_all_caps()
+		self.is_capitalized()
 		self.is_alpha_num()
 		self.word_length()
 		self.is_number()

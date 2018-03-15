@@ -6,6 +6,7 @@ UNSRT_LPERSON_FNAME="../../data/person-last.txt"
 #Feature names
 feature_names=[
 "is_all_caps",
+"is_capitalized"
 "is_alpha_num",
 "word_length",
 "is_number",
