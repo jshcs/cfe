@@ -1,11 +1,10 @@
-
-
 #using bibtexparser
 
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogenize_latex_encoding
 from bibtexparser.bibdatabase import as_text
+import re
 
 dict = {}
 
@@ -18,13 +17,15 @@ with open('bib-2.bib') as bibtex_file:
         for key in listofkeys :
             akey = as_text(key)
             dict[akey] = bib_database.entries[entry][akey]
-            print akey , dict[akey]
+##            print akey , dict[akey]
+        dict['title'] = re.sub('[{}]', '', dict['title'])
+        print 'author',dict['author'] 
+        print 'title',dict['title']
         print '\n'
 
 '''
 #incomplete :P
 #map bbl to dict
-
 pairs = {}
 pairs['Asuru:1992:OAS'] = 'cite'
 match = open('Asuru:1992:OAS.bbl', 'r') 
@@ -36,7 +37,6 @@ lines = ''.join(lines.split('}'))
 lines = ''.join(lines.split('\\textit'))
 lines = lines.split('\n')
 print lines
-
 for line in lines :
     print line
     wrds = line.split(' ')
