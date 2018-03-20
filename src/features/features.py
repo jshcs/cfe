@@ -1,5 +1,6 @@
 from config import *
 from utils import *
+import datetime
 
 class Features():
 	def __init__(self,token):
@@ -33,6 +34,21 @@ class Features():
 		else:
 			self.features["enclosed_brackets"]=False
 
+	def has_hyphen(self):
+		self.features["has_hyphen"]=binary_search(sorted(self.token),'-',0,len(self.token)-1)
+
+	def has_colon(self):
+		self.features["has_colon"]=binary_search(sorted(self.token),':',0,len(self.token)-1)
+
+	def is_etal(self):
+		self.features["is_etal"]=self.token=='et' or self.token=='al'
+
+	def is_valid_year(self):
+		self.features["is_valid_year"]=self.features["is_number"] and self.features["word_length"]<=4 and 1<=int(self.token)<=datetime.datetime.now().year
+
+	def is_special_token(self):
+		self.features["is_special_token"]=binary_search(SPCL_KEYS,self.token,0,len(SPCL_KEYS)-1)
+
 	def first_name_lexicon(self):
 		arr=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
 		start=0
@@ -53,6 +69,11 @@ class Features():
 		self.is_number()
 		self.ends_with_period()
 		self.enclosed_brackets()
+		self.has_hyphen()
+		self.has_colon()
+		self.is_etal()
+		self.is_valid_year()
+		self.is_special_token()
 		self.first_name_lexicon()
 		self.last_name_lexicon()
 		return self.features
