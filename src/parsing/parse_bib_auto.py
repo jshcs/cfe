@@ -5,6 +5,7 @@ from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogenize_latex_encoding
 from bibtexparser.bibdatabase import as_text
 import re
+import string
 
 dict = {}
 
@@ -19,6 +20,8 @@ with open('bib-2.bib') as bibtex_file:
             dict[akey] = bib_database.entries[entry][akey]
 ##            print akey , dict[akey]
         dict['title'] = re.sub('[{}]', '', dict['title'])
+        dict['title'] = string.replace(dict['title'],'\n', ' ')
+        dict['author'] = string.replace(dict['author'],'\n', ' ')
         print 'author',dict['author'] 
         print 'title',dict['title']
         print '\n'
