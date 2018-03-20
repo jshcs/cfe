@@ -12,8 +12,15 @@ feature_names=[
 "is_number",
 "ends_with_period",
 "enclosed_brackets",
+"has_hyphen",
+"has_colon",
+"is_etal",
+"is_valid_year",
+"is_special_token",
 "first_name_lexicon",
 "last_name_lexicon",
 ]
 
 BRACKETS={'(':')','[':']','{':'}'}
+
+SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']

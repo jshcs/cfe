@@ -1,6 +1,6 @@
 from features import *
 
-token="[1234]"
+token="vo:l."
 
 t=Features(token)
 f=t.get_features()
