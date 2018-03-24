@@ -1,42 +1,58 @@
 import lxml.etree
 import xml.etree.ElementTree as ET
 import csv
+from config import *
 
-parser = lxml.etree.XMLParser(recover = True)
-spl = {'&' : 'Rand' , '"' : 'Rdquote' , "'" :  'Rquote'}
+class GetDict():
+	def __init__(self,filename):
+		with open(filename,'r') as f:
+			self.content=f.readlines()
+		self.labels=[]
+		self.citation_strings=[]
+		self.token_label={}
+		self.parser=lxml.etree.XMLParser(recover = True)
+		self.spl={'&':'Rand','"':'Rdquote',"'":'Rquote'}
+	def make_dict(self):
+		for line in self.content:
+			curr_sentence=[]
+			temp_dict={}
+			mod_string='<NODE>'+line+'</NODE>'
+			for spchar in self.spl.keys():
+				if spchar in mod_string:
+					mod_string=mod_string.replace(spchar,self.spl[spchar])
+			tree_rec=ET.fromstring(mod_string,self.parser)
+			for ele in tree_rec.iter():
+				if ele.text!=" ":
+					if ele.tag!='NODE':
+						if 'person' in ele.tag:
+							temp_dict[ele.text.strip()]='person'
+						else:
+							temp_dict[ele.text.strip()]=ele.tag
+						curr_sentence.append(ele.text.strip())
+			self.citation_strings.append(' '.join(curr_sentence))
+			self.token_label[self.citation_strings[-1]]=temp_dict
+			self.labels.append(temp_dict.values())
+	def get_dict(self,citation_string):
+		return self.token_label[citation_string]
+	def get_all_dict(self):
+		return self.token_label
+	def print_all_dict(self):
+		for s in self.citation_strings:
+			print "Sentence"
+			print "*"*20
+			print s
+			print "*"*20
+			print "key-values"
+			print "*"*20
+			print self.token_label[s]
+			print
+			print "*"*20
 
-labels = []
-inputs = [[]]
-output = [[]]
-S =[]
-s_dict = {}
-with open('dev.docs','r') as f :
-    content = f.readlines()
-#get 2 strings
-for lines in content[:2]:
-    sentence = []
-    temp_dict = {}
-    aline = '<NODE>' + lines + '</NODE>'
-    print aline
-    for splchar in spl.keys():
-        if splchar in aline :
-            aline = aline.replace(splchar, spl[splchar])
-    tree_rec = ET.fromstring(aline,parser)
-    for ele in tree_rec.iter() :
-        print ele.tag
-        if ele .tag != 'NODE':
-            if 'person' in ele.tag :
-                temp_dict[ele.text] = 'person'
-            else :
-                temp_dict[ele.text] = ele.tag
-            sentence.append(ele.text)
-    print temp_dict
-    print sentence
-    S.append(sentence)
-    s_dict[' '.join(sentence)] = temp_dict
-    labels.append(temp_dict.values())
-print type(s_dict.keys()) , type(s_dict.values())
-print s_dict.items()[0]
-# the key value is the input citation string
-# the value label is the dict of the same string
+	def get_size(self):
+		return len(self.citation_strings)
 
+
+# test=GetDict(TEST_FILE)
+# test.make_dict()
+# test.print_all_dict()
+# print test.get_size()
