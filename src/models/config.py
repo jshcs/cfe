@@ -22,4 +22,11 @@ config_params={
 "lrate_decay":0.9,
 "do_bnorm":True,
 "do_dropout":True,
+"max_stream_length":20,
 }
+
+TRAIN_FILE='../../data/umass_cfe/training.docs'
+TEST_FILE='../../data/umass_cfe/testing.docs'
+DEV_FILE='../../data/umass_cfe/dev.docs'
+
+ALL_TAGS=['person','title','year','journal','volume','pages']
