@@ -30,7 +30,7 @@ class GetDict():
 							temp_dict[ele.text.strip()]=ele.tag
 						curr_sentence.append(ele.text.strip())
 			self.citation_strings.append(' '.join(curr_sentence))
-			self.token_label[self.citation_strings[-1]]=temp_dict
+			self.token_label[self.citation_strings[-1]]=(curr_sentence,temp_dict)
 			self.labels.append(temp_dict.values())
 	def get_dict(self,citation_string):
 		return self.token_label[citation_string]
@@ -52,7 +52,7 @@ class GetDict():
 		return len(self.citation_strings)
 
 
-# test=GetDict(TEST_FILE)
+# test=GetDict(DEV_FILE)
 # test.make_dict()
 # test.print_all_dict()
 # print test.get_size()
