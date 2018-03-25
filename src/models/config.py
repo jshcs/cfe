@@ -30,3 +30,5 @@ TEST_FILE='../../data/umass_cfe/testing.docs'
 DEV_FILE='../../data/umass_cfe/dev.docs'
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
+
+PUNCT=[".",",",";",":"]

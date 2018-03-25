@@ -26,12 +26,26 @@ class GetDict():
 				if ele.text!=" ":
 					if ele.tag!='NODE':
 						if 'person' in ele.tag:
-							temp_dict[ele.text.strip()]='person'
-							tmp_labels.append('person')
+							txt=ele.text.strip().split(" ")
+							txt=[t for t in txt if t not in PUNCT]
+							#print txt
+							for t in txt:
+								#if t not in PUNCT:
+								temp_dict[t]='person'
+								tmp_labels.append('person')
+								# else:
+								# 	print t
 						else:
-							temp_dict[ele.text.strip()]=ele.tag
-							tmp_labels.append(ele.tag)
-						curr_sentence.append(ele.text.strip())
+							txt=ele.text.strip().split(" ")
+							txt=[t for t in txt if t not in PUNCT]
+							for t in txt:
+								#if t not in PUNCT:
+								temp_dict[t]=ele.tag
+								tmp_labels.append(ele.tag)
+								# else:
+								# 	print t
+						curr_sentence=curr_sentence+txt
+						#print curr_sentence
 
 			self.citation_strings.append(' '.join(curr_sentence))
 			self.labels.append(tmp_labels)
