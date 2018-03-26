@@ -82,7 +82,7 @@ class Features():
                 fDict = self.get_features()
                 v = []
                 for i in fDict:
-                        v.append(int(fDict[i]))
+                        v.append(float(fDict[i]))
 
                 return v
 

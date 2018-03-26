@@ -71,7 +71,11 @@ class GetDict():
 		return len(self.citation_strings)
 
 
-# test=GetDict(DEV_FILE)
-# test.make_dict()
-# test.print_all_dict()
-# print test.get_size()
+##test=GetDict(TRAIN_FILE)
+##test.make_dict()
+##test.print_all_dict()
+##print test.citation_strings[0]
+##print test.token_label[test.citation_strings[0]][0]
+##print test.token_label[test.citation_strings[0]][1]
+##print len(test.token_label[test.citation_strings[0]][0])
+##print test.get_size()

@@ -17,18 +17,31 @@ config_params={
 "last_name_lexicon",
 ],
 #Training params
-"epochs":10,
+"epochs":100,
 "lrate":3e-4,
 "lrate_decay":0.9,
 "do_bnorm":True,
 "do_dropout":True,
-"max_stream_length":20,
+"max_stream_length":30,
+"num_units":100,
+"batch_size":100
 }
 
 TRAIN_FILE='../../data/umass_cfe/training.docs'
 TEST_FILE='../../data/umass_cfe/testing.docs'
 DEV_FILE='../../data/umass_cfe/dev.docs'
 
+SORTED_FPERSON_FNAME="../../data/sorted-person-first.txt"
+SORTED_LPERSON_FNAME="../../data/sorted-person-last.txt"
+UNSRT_FPERSON_FNAME="../../data/person-first.txt"
+UNSRT_LPERSON_FNAME="../../data/person-last.txt"
+
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
 PUNCT=[".",",",";",":"]
+
+labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
+
+BRACKETS={'(':')','[':']','{':'}'}
+
+SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
