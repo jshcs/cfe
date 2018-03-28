@@ -17,14 +17,14 @@ config_params={
 "last_name_lexicon",
 ],
 #Training params
-"epochs":1,
+"epochs":100,
 "lrate":3e-4,
 "lrate_decay":0.9,
 "do_bnorm":True,
 "do_dropout":True,
-"max_stream_length":30,
+"max_stream_length":115,
 "num_units":100,
-"batch_size":10,
+"batch_size":20,
 "num_layer":1,
 }
 

@@ -7,20 +7,19 @@ from umass_parser import *
 from features import *
 from readDataset import *
 from BatchGenerator import *
-import time
 
 #loading data
-with open('../../data/train.pickle', 'rb') as inp:
+with open('../../data/train.pkl', 'rb') as inp:
 	X_train = pickle.load(inp)
 	y_train = pickle.load(inp)
 
-with open('../../data/val.pickle', 'rb') as inp:
+with open('../../data/val.pkl', 'rb') as inp:
 	X_valid = pickle.load(inp)
 	y_valid = pickle.load(inp)
 
-with open('../../data/test.pickle', 'rb') as inp:
-	X_test = pickle.load(inp)
-	y_test = pickle.load(inp)
+##with open('../../data/test.pickle', 'rb') as inp:
+##	X_test = pickle.load(inp)
+##	y_test = pickle.load(inp)
 
 #data_train = BatchGenerator(X_train, y_train, shuffle=False)
 # data_valid = BatchGenerator(X_valid, y_valid, shuffle=False)
@@ -33,11 +32,15 @@ lrate = config_params["lrate"]
 num_units = config_params["num_units"]
 length = config_params["max_stream_length"]
 num_features = len(config_params["feature_names"])
-num_classes = len(labels)
+num_classes = len(labels)+1
 epochs = config_params["epochs"]
 tr_batch_size = config_params["batch_size"]
 layer_num = config_params["num_layer"]
 max_grad_norm = 5.0
+
+##np.reshape(X_train,(-1, length, num_features))
+##np.reshape(y_train,(-1, length, num_classes))
+print X_train.shape,y_train.shape
 
 lr = tf.placeholder(tf.float32, [])
 keep_prob = tf.placeholder(tf.float32, [])
@@ -61,8 +64,8 @@ def lstm(tokens):
 
 #input placeholder
 with tf.variable_scope('Inputs'):
-	data = tf.placeholder(tf.float32, shape=(10, length, num_features))
-	target = tf.placeholder(tf.float32, shape=(10, length, num_classes))
+	data = tf.placeholder(tf.float32, shape=(None, length, num_features))
+	target = tf.placeholder(tf.float32, shape=(None, length, num_classes))
 	print "data shape",data.get_shape,"target shape",target.get_shape
 
 #lstm netowk to get the output
@@ -92,12 +95,11 @@ train_op = optimizer.apply_gradients(zip(grads, tvars),
 
 #test on other data set (valid or test)
 def test_epoch(data_x,data_y):
-	_batch_size = 10
+	_batch_size = data_x.shape[0]
 	fetches = [accuracy, cost]
 	_y = data_y
 	data_size = _y.shape[0]
 	batch_num = int(data_size / _batch_size)
-	start_time = time.time()
 	_costs = 0.0
 	_accs = 0.0
 	for i in xrange(batch_num):
@@ -119,50 +121,31 @@ def get_random_batch(data_size,batch_size):
 #begin to train
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
-tr_batch_size = 10
-display_num = 1
+tr_batch_size = 20
+display_num = 10
 tr_batch_num = int(y_train.shape[0] / tr_batch_size)
-#display_batch = int(tr_batch_num / display_num)
-display_batch = int(tr_batch_num / display_num)
+##display_batch = int(tr_batch_num / display_num)
 saver = tf.train.Saver(max_to_keep=10)
 for epoch in xrange(epochs):
 	_costs = 0.0
 	_accs = 0.0
-	show_accs = 0.0
-	show_costs = 0.0
-	for batch in xrange(1):
-		#fetches = [accuracy, cost, train_op]
-		fetches=[accuracy,cost]
-		#print accuracy,cost,train_op
-		#idx=get_random_batch(X_train.shape[0],tr_batch_size)
-		print "Sizes....",X_train.shape
-		X_batch, y_batch = X_train,y_train
-		print "Hey shapes",X_batch.shape,y_batch.shape
-		feed_dict = {data:X_batch, target:y_batch, batch_size:tr_batch_size,lr:lrate, keep_prob:0.5}
-		#print feed_dict
-		print "X_batch"
-		print type(X_batch)
-		print "y_batch"
-		print type(y_batch)
-		print "data and target shapes",data.get_shape,target.get_shape
-		_acc, _cost= sess.run(accuracy, feed_dict),sess.run(cost,feed_dict)
+##	show_accs = 0.0
+##	show_costs = 0.0
+	for batch in xrange(tr_batch_num):
+		fetches = [accuracy, cost, train_op]
+		X_batch = X_train[batch*tr_batch_size:(batch+1)*tr_batch_size,:,:]
+		y_batch = y_train[batch*tr_batch_size:(batch+1)*tr_batch_size,:,:]
+		feed_dict = {data:X_batch, target:y_batch, batch_size:tr_batch_size,lr:lrate, keep_prob:1}
+		_acc, _cost, _ = sess.run(fetches, feed_dict)
 		_accs += _acc
 		_costs += _cost
-		show_accs += _acc
-		show_costs += _cost
-		if (batch + 1) % display_batch == 0:
-			valid_acc, valid_cost = test_epoch(X_valid,y_valid)  # valid
-			print '\ttraining acc=%g, cost=%g;  valid acc= %g, cost=%g ' % (show_accs / display_batch,
-												show_costs / display_batch, valid_acc, valid_cost)
-			show_accs = 0.0
-			show_costs = 0.0
 	mean_acc = _accs / tr_batch_num
 	mean_cost = _costs / tr_batch_num
-	if (epoch + 1) % display_batch == 0:
-		save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
-		print 'the save path is ', save_path
-	print '\ttraining %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
-	print 'Epoch training %d, acc=%g, cost=%g' % (y_train.shape[0], mean_acc, mean_cost)
+	if (epoch + 1) % display_num == 0:
+            save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
+	    print 'the save path is ', save_path
+	    print 'epoch',epoch+1
+            print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
 # testing
 print '**TEST RESULT:'
 test_acc, test_cost = test_epoch(X_valid,y_valid)
