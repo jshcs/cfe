@@ -6,7 +6,7 @@ from config import *
 class GetDict():
 	def __init__(self,filename):
 		with open(filename,'r') as f:
-			self.content=f.readlines()
+			self.content=f.readlines()[:10]
 		self.labels=[]
 		self.citation_strings=[]
 		self.token_label={}

@@ -1,6 +1,7 @@
 from config import *
 from utils import *
 import datetime
+import numpy as np
 
 class Features():
 	def __init__(self,token):
@@ -78,11 +79,9 @@ class Features():
 		self.last_name_lexicon()
 		return self.features
 
-        def vectorize(self):
-                fDict = self.get_features()
-                v = []
-                for i in fDict:
-                        v.append(float(fDict[i]))
+	def vectorize(self):
+		fDict = self.get_features()
+		v = np.array(fDict.values())
 
-                return v
+		return v
 

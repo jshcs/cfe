@@ -43,8 +43,8 @@ class BatchGenerator():
             # Shuffle the data 
             if self._shuffle:
                 new_index = np.random.permutation(self._number_examples)
-                self._X = self._X[new_index]
-                self._y = self._y[new_index]
+                self._X = np.array(self._X[new_index])
+                self._y = np.array(self._y[new_index])
             start = 0
             self._index_in_epoch = batch_size
             assert batch_size <= self._number_examples

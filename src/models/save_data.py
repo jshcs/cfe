@@ -9,31 +9,35 @@ import pickle
 import os
 
 def main():
-    #initial parameter
-    length = config_params["max_stream_length"]
-    num_features = len(config_params["feature_names"])
-    num_classes = len(labels)+1
-    epochs = config_params["epochs"]
-    batch_size = config_params["batch_size"]
-    
-    #reading data
-    train_token,train_label = read_dataset("train")
-    val_token,val_label = read_dataset("dev")
-    test_token,test_label = read_dataset("test")
+	#initial parameter
+	length = config_params["max_stream_length"]
+	num_features = len(config_params["feature_names"])
+	num_classes = len(labels)
+	epochs = config_params["epochs"]
+	batch_size = config_params["batch_size"]
 
-    with open('../../data/train.pkl', 'wb') as outp:
-        pickle.dump(np.asarray(train_token), outp)
-        pickle.dump(np.asarray(train_label), outp)
+	#reading data
+	train_token,train_label = read_dataset("train")
+	#print type(train_token),type(train_label)
+	print np.array(train_label)
+	#print np.array(train_label).shape,np.array(train_token).shape
+	val_token,val_label = read_dataset("dev")
+	test_token,test_label = read_dataset("test")
+	print np.array(train_label).shape,np.array(train_token).shape
 
-    with open('../../data/val.pkl', 'wb') as outp:
-        pickle.dump(np.asarray(val_token), outp)
-        pickle.dump(np.asarray(val_label), outp)
+	with open('../../data/train.pickle', 'wb') as outp:
+		pickle.dump(np.array(train_token), outp)
+		pickle.dump(np.array(train_label), outp)
 
-    with open('../../data/test.pkl', 'wb') as outp:
-        pickle.dump(np.asarray(test_token), outp)
-        pickle.dump(np.asarray(test_label), outp)
+	with open('../../data/val.pickle', 'wb') as outp:
+		pickle.dump(np.asarray(val_token), outp)
+		pickle.dump(np.asarray(val_label), outp)
 
-    #initial tf placeholder
+	with open('../../data/test.pickle', 'wb') as outp:
+		pickle.dump(np.asarray(test_token), outp)
+		pickle.dump(np.asarray(test_label), outp)
+
+	#initial tf placeholder
 ##    data = tf.placeholder(tf.float32, shape=(None, length, num_features))
 ##    target = tf.placeholder(tf.float32, shape=(None, length, num_classes))
 ##
@@ -67,6 +71,6 @@ def main():
 ##    print('Validation error on valid data {:3.1f}%'.format(100 * error))
 
 
-    
+
 if __name__ == '__main__':
-    main()
+	main()

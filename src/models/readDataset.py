@@ -22,26 +22,26 @@ def read_dataset(data_type):
                 f = [0.0]*len(config_params['feature_names'])
             else:
                 f = wordFeature.vectorize()
-            tempFeature.append(f)
+            tempFeature.append(np.array(f))
             #transfer labels to vector
-            oneHot = [0.0]*(len(labels)+1)
+            oneHot = [0.0]*(len(labels))
             if labelsStr[i] in labels:
                 oneHot[labels[labelsStr[i]]] = 1.0
             else:
-                oneHot[len(labels)] = 1.0
-            tempLabel.append(oneHot)
+                oneHot[len(labels)-1] = 1.0
+            tempLabel.append(np.array(oneHot))
         #compensate the vector when thestring is shorter than mex length
         f = [0.0]*len(config_params['feature_names'])
-        oneHot = [0.0]*(len(labels)+1)
-        oneHot[len(labels)] = 1.0
+        oneHot = [0.0]*(len(labels))
+        oneHot[len(labels)-1] = 1.0
         while len(tempFeature)<config_params["max_stream_length"]:
-            tempFeature.append(f)
-            tempLabel.append(oneHot)
+            tempFeature.append(np.array(f))
+            tempLabel.append(np.array(oneHot))
         #append the current string result to dataset
-        data_feature.append(tempFeature)
-        data_target.append(tempLabel)
+        data_feature.append(np.array(tempFeature))
+        data_target.append(np.array(tempLabel))
 
-    return data_feature,data_target
+    return np.array(data_feature),np.array(data_target)
 
 ##    ##get validation data
 ##    valid_data_feature = []
