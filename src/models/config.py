@@ -24,7 +24,8 @@ config_params={
 "do_dropout":True,
 "max_stream_length":30,
 "num_units":100,
-"batch_size":100
+"batch_size":100,
+"num_layer":1,
 }
 
 TRAIN_FILE='../../data/umass_cfe/training.docs'
