@@ -18,7 +18,7 @@ config_params={
 ],
 #Training params
 "epochs":100,
-"lrate":3e-4,
+"lrate":1e-3,
 "lrate_decay":0.9,
 "do_bnorm":True,
 "do_dropout":True,
@@ -26,6 +26,7 @@ config_params={
 "num_units":100,
 "batch_size":20,
 "num_layer":1,
+"decay_rate":0.75
 }
 
 TRAIN_FILE='../../data/umass_cfe/training.docs'

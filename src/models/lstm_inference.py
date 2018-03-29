@@ -6,6 +6,8 @@ from config import *
 from umass_parser import *
 from features import *
 from readDataset import *
+from BatchGenerator import *
+
 #loading data
 with open('../../data/train.pkl', 'rb') as inp:
 	X_train = pickle.load(inp)
@@ -34,6 +36,7 @@ num_classes = len(labels)+1
 epochs = config_params["epochs"]
 tr_batch_size = config_params["batch_size"]
 layer_num = config_params["num_layer"]
+decay_rate = config_params["decay_rate"]
 max_grad_norm = 5.0
 
 ##np.reshape(X_train,(-1, length, num_features))
@@ -101,7 +104,6 @@ def test_epoch(data_x,data_y):
 	_costs = 0.0
 	_accs = 0.0
 	for i in xrange(batch_num):
-		#idx=get_random_batch(data_x.shape[0],tr_batch_size)
 		X_batch, y_batch = data_x,data_y
 		feed_dict = {data:X_batch, target:y_batch, batch_size:_batch_size, keep_prob:1.0}
 		_acc, _cost = sess.run(fetches, feed_dict)
@@ -121,34 +123,37 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 tr_batch_size = 20
 display_num = 10
+decay_num = 10
 tr_batch_num = int(y_train.shape[0] / tr_batch_size)
-##display_batch = int(tr_batch_num / display_num)
 saver = tf.train.Saver(max_to_keep=10)
 for epoch in xrange(epochs):
 	_costs = 0.0
 	_accs = 0.0
-##	show_accs = 0.0
-##	show_costs = 0.0
+	_lr = lrate*(decay_rate**(epoch/decay_num))
 	for batch in xrange(tr_batch_num):
 		fetches = [accuracy, cost, train_op]
 		X_batch = X_train[batch*tr_batch_size:(batch+1)*tr_batch_size,:,:]
 		y_batch = y_train[batch*tr_batch_size:(batch+1)*tr_batch_size,:,:]
-		feed_dict = {data:X_batch, target:y_batch, batch_size:tr_batch_size,lr:lrate, keep_prob:1}
+		feed_dict = {data:X_batch, target:y_batch, batch_size:tr_batch_size,lr:_lr, keep_prob:1}
 		_acc, _cost, _ = sess.run(fetches, feed_dict)
 		_accs += _acc
 		_costs += _cost
 	mean_acc = _accs / tr_batch_num
 	mean_cost = _costs / tr_batch_num
 	if (epoch + 1) % display_num == 0:
-		save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
-		print 'the save path is ', save_path
-	print 'epoch',epoch+1
-	print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
+            save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
+	    print 'the save path is ', save_path
+	    print 'epoch',epoch+1
+            print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
 # testing
-print '**DEV RESULT:'
-val_acc, val_cost = test_epoch(X_valid,y_valid)
-print '**Test %d, acc=%g, cost=%g' % (y_valid.shape[0], val_acc, val_cost)
+print '**VAL RESULT:'
+test_acc, test_cost = test_epoch(X_valid,y_valid)
+print '**VAL %d, acc=%g, cost=%g' % (y_valid.shape[0], test_acc, test_cost)
 
 print '**TEST RESULT:'
 test_acc, test_cost = test_epoch(X_test,y_test)
-print '**Test %d, acc=%g, cost=%g' % (y_test.shape[0], test_acc, test_cost)
+print '**TEST %d, acc=%g, cost=%g' % (y_test.shape[0], test_acc, test_cost)
+
+
+
+
