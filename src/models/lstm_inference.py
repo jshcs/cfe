@@ -17,9 +17,9 @@ with open('../../data/val.pkl', 'rb') as inp:
 	X_valid = pickle.load(inp)
 	y_valid = pickle.load(inp)
 
-##with open('../../data/test.pickle', 'rb') as inp:
-##	X_test = pickle.load(inp)
-##	y_test = pickle.load(inp)
+with open('../../data/test.pickle', 'rb') as inp:
+	X_test = pickle.load(inp)
+	y_test = pickle.load(inp)
 
 #data_train = BatchGenerator(X_train, y_train, shuffle=False)
 # data_valid = BatchGenerator(X_valid, y_valid, shuffle=False)
@@ -142,11 +142,15 @@ for epoch in xrange(epochs):
 	mean_acc = _accs / tr_batch_num
 	mean_cost = _costs / tr_batch_num
 	if (epoch + 1) % display_num == 0:
-            save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
-	    print 'the save path is ', save_path
-	    print 'epoch',epoch+1
-            print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
+		save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
+		print 'the save path is ', save_path
+	print 'epoch',epoch+1
+	print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
 # testing
+print '**DEV RESULT:'
+val_acc, val_cost = test_epoch(X_valid,y_valid)
+print '**Test %d, acc=%g, cost=%g' % (y_valid.shape[0], val_acc, val_cost)
+
 print '**TEST RESULT:'
-test_acc, test_cost = test_epoch(X_valid,y_valid)
-print '**Test %d, acc=%g, cost=%g' % (y_valid.shape[0], test_acc, test_cost)
+test_acc, test_cost = test_epoch(X_test,y_test)
+print '**Test %d, acc=%g, cost=%g' % (y_test.shape[0], test_acc, test_cost)
