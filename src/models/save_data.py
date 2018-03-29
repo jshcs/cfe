@@ -54,47 +54,6 @@ def main():
 	# print 'val'
 	# print X_valid.shape,y_valid.shape
 
-##    with open('../../data/test.pickle', 'rb') as inp:
-##        X_test = pickle.load(inp)
-##	y_test = pickle.load(inp)
-##
-##    print 'test'	
-##    print X_test.shape,y_test.shape
-
-	#initial tf placeholder
-##    data = tf.placeholder(tf.float32, shape=(None, length, num_features))
-##    target = tf.placeholder(tf.float32, shape=(None, length, num_classes))
-##
-##    #lstm network
-##    model = LSTM(data,target)
-##    init = tf.global_variables_initializer()
-##    sess = tf.Session()
-##    sess.run(init)
-##
-##    batch = len(train_token)//batch_size
-##    if len(train_token)%batch_size>0:
-##        batch = batch+1
-##    for epoch in range(epochs):
-##        print(epoch)
-##        for b in range(batch):
-##            if b==batch-1:
-##                token_batch = train_token[b*batch_size:]
-##                label_batch = train_label[b*batch_size:]
-##            else:
-##                token_batch = train_token[b*batch_size:(b+1)*batch_size]
-##                label_batch = train_label[b*batch_size:(b+1)*batch_size]
-##            sess.run(model.opt,
-##                     {data: token_batch, target: label_batch})
-##        if (epoch+1)%10==0:
-##            error = sess.run(model.error,
-##                             {data: train_token, target: train_label})
-##        print('Epoch {:2d} error on valid data {:3.1f}%'.format(epoch + 1, 100 * error))
-##
-##    valError = sess.run(model.error,
-##                        {data:val_token, target:val_label})
-##    print('Validation error on valid data {:3.1f}%'.format(100 * error))
-
-
 
 if __name__ == '__main__':
 	main()
