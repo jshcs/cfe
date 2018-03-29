@@ -1,4 +1,5 @@
 import tensorflow as tf
+from sklearn.metrics import f1_score
 import numpy as np
 from tensorflow.contrib import rnn
 import pickle
@@ -36,12 +37,9 @@ num_classes = len(labels)+1
 epochs = config_params["epochs"]
 tr_batch_size = config_params["batch_size"]
 layer_num = config_params["num_layer"]
-decay_rate = config_params["decay_rate"]
+decay_rate = config_params["lrate_decay"]
 max_grad_norm = 5.0
 
-##np.reshape(X_train,(-1, length, num_features))
-##np.reshape(y_train,(-1, length, num_classes))
-print X_train.shape,y_train.shape
 
 lr = tf.placeholder(tf.float32, [])
 keep_prob = tf.placeholder(tf.float32, [])
@@ -75,7 +73,7 @@ lstm_output = lstm(data)
 #output of lstm network after last softmax layer
 with tf.variable_scope('outputs'):
 	label_preds = tf.matmul(lstm_output, wo) + bo
-	print lstm_output.get_shape,wo.get_shape
+##	print lstm_output.get_shape,wo.get_shape
 	label_pred = tf.reshape(label_preds, [-1,length, num_classes])
 
 #check predict result against ground truth
@@ -83,7 +81,8 @@ correct_prediction = tf.equal(tf.argmax(label_pred, 2),tf.argmax(target,2))
 #get accuracy
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 #cost function
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = target, logits = label_pred))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = target, logits = label_pred)) 
+
 
 #grandient desent
 tvars = tf.trainable_variables() 
@@ -96,22 +95,20 @@ train_op = optimizer.apply_gradients(zip(grads, tvars),
 
 #test on other data set (valid or test)
 def test_epoch(data_x,data_y):
-	_batch_size = data_x.shape[0]
-	fetches = [accuracy, cost]
-	_y = data_y
-	data_size = _y.shape[0]
-	batch_num = int(data_size / _batch_size)
-	_costs = 0.0
-	_accs = 0.0
-	for i in xrange(batch_num):
-		X_batch, y_batch = data_x,data_y
-		feed_dict = {data:X_batch, target:y_batch, batch_size:_batch_size, keep_prob:1.0}
-		_acc, _cost = sess.run(fetches, feed_dict)
-		_accs += _acc
-		_costs += _cost
-	mean_acc= _accs / batch_num
-	mean_cost = _costs / batch_num
-	return mean_acc, mean_cost
+	fetches = [accuracy, cost, label_pred]
+	data_size = data_y.shape[0]
+	X_batch, y_batch = data_x,data_y
+	feed_dict = {data:data_x, target:data_y, batch_size:data_size, keep_prob:1.0}
+	_accs, _costs, _pred = sess.run(fetches, feed_dict)
+	#F1 result
+	_pred = np.argmax(_pred, axis = 2)
+	pred = np.reshape(_pred,(1,-1))
+	pred = np.squeeze(pred)
+	ground_truth = np.argmax(data_y, axis = 2)
+	ground_truth = np.reshape(ground_truth,(1,-1))
+	ground_truth = np.squeeze(ground_truth)
+        _scores = f1_score(ground_truth,pred, average='weighted') 
+	return _accs, _costs, _scores
 
 
 
@@ -123,7 +120,7 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 tr_batch_size = 20
 display_num = 10
-decay_num = 10
+decay_num = 15
 tr_batch_num = int(y_train.shape[0] / tr_batch_size)
 saver = tf.train.Saver(max_to_keep=10)
 for epoch in xrange(epochs):
@@ -145,14 +142,14 @@ for epoch in xrange(epochs):
 	    print 'the save path is ', save_path
 	    print 'epoch',epoch+1
             print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
-# testing
-print '**VAL RESULT:'
-test_acc, test_cost = test_epoch(X_valid,y_valid)
-print '**VAL %d, acc=%g, cost=%g' % (y_valid.shape[0], test_acc, test_cost)
+            print '**VAL RESULT:'
+            val_acc, val_cost,val_score = test_epoch(X_valid,y_valid)
+            print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
 
+# testing
 print '**TEST RESULT:'
-test_acc, test_cost = test_epoch(X_test,y_test)
-print '**TEST %d, acc=%g, cost=%g' % (y_test.shape[0], test_acc, test_cost)
+test_acc, test_cost,test_score = test_epoch(X_test,y_test)
+print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost, test_score)
 
 
 
