@@ -6,8 +6,6 @@ from config import *
 from umass_parser import *
 from features import *
 from readDataset import *
-from BatchGenerator import *
-
 #loading data
 with open('../../data/train.pkl', 'rb') as inp:
 	X_train = pickle.load(inp)
@@ -47,7 +45,7 @@ keep_prob = tf.placeholder(tf.float32, [])
 batch_size = tf.placeholder(tf.int32,[])
 wo = tf.Variable(tf.truncated_normal([num_units,num_classes]))
 bo = tf.Variable(tf.constant(0.1, shape=[num_classes]))
-model_save_path = 'ckpt/bi-lstm.ckpt'
+model_save_path = 'ckpt/lstm.ckpt'
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 #lstm cell
