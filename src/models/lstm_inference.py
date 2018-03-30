@@ -1,5 +1,6 @@
 import tensorflow as tf
 from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report
 import numpy as np
 from tensorflow.contrib import rnn
 import pickle
@@ -39,6 +40,8 @@ tr_batch_size = config_params["batch_size"]
 layer_num = config_params["num_layer"]
 decay_rate = config_params["lrate_decay"]
 max_grad_norm = 5.0
+target_names = ALL_TAGS
+target_names.append('unknown')
 
 
 lr = tf.placeholder(tf.float32, [])
@@ -107,7 +110,9 @@ def test_epoch(data_x,data_y):
 	ground_truth = np.argmax(data_y, axis = 2)
 	ground_truth = np.reshape(ground_truth,(1,-1))
 	ground_truth = np.squeeze(ground_truth)
-        _scores = f1_score(ground_truth,pred, average='weighted') 
+        _scores = f1_score(ground_truth,pred, average='weighted')
+        print('classification report')
+        print(classification_report(ground_truth, pred, target_names=target_names))
 	return _accs, _costs, _scores
 
 
