@@ -2,11 +2,14 @@ from config import *
 from utils import *
 import datetime
 import numpy as np
+import validators
 
 class Features():
-    def __init__(self,token):
+    def __init__(self,token,vocab_journals,vocab_bioterms):
         self.token=token
-        self.features={k:None for k in config_params['feature_names']}
+        self.jnames_vocab=vocab_journals
+        self.bioterms_vocab=vocab_bioterms
+        self.features={k:False for k in config_params['feature_names']}
 
     def is_all_caps(self):
         self.features["is_all_caps"]=self.token.isupper()
@@ -50,6 +53,22 @@ class Features():
     def is_special_token(self):
         self.features["is_special_token"]=binary_search(SPCL_KEYS,self.token,0,len(SPCL_KEYS)-1)
 
+    def has_period_period(self):
+        if ".." in self.token:
+            self.features["has_period_period"]=True
+
+    def has_period_comma(self):
+        if ".," in self.token:
+            self.features["has_period_comma"]=True
+
+    def is_url(self):
+        if validators.url(self.token):
+            self.features["is_url"]=True
+
+    def is_email(self):
+        if validators.email(self.token):
+            self.features["is_email"]=True
+
     def first_name_lexicon(self):
         arr=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
         start=0
@@ -62,9 +81,25 @@ class Features():
         end=len(arr)-1
         self.features["last_name_lexicon"]=binary_search(arr,self.token.upper(),start,end)
 
-    # def journal_lexicon(self):
-    #     arr=read_file_into_array(SORTED_JOURNAL_NAME)
+    def journal_lexicon(self):
+        if self.token.lower() in self.jnames_vocab:
+            self.features["journal_name_lexicon"]=True
+        else:
+            for w in self.jnames_vocab:
+                if len(w)>=len(self.token):
+                    if float(longest_common_substring(self.token,w))/max(len(self.token),len(w))>=0.6:
+                        self.features["journal_name_lexicon"]=True
+                        break
 
+    def is_bio_term(self):
+        if self.token.lower() in self.bioterms_vocab:
+            self.features["is_bio_term"]=True
+        else:
+            for w in self.bioterms_vocab:
+                if len(w)>=len(self.token):
+                    if float(longest_common_substring(self.token,w))/max(len(self.token),len(w))>=0.6:
+                        self.features["is_bio_term"]=True
+                        break
 
     def get_features(self):
         self.is_all_caps()
@@ -79,8 +114,14 @@ class Features():
         self.is_etal()
         self.is_valid_year()
         self.is_special_token()
+        self.has_period_period()
+        self.has_period_comma()
+        self.is_url()
+        self.is_email()
         self.first_name_lexicon()
         self.last_name_lexicon()
+        self.journal_lexicon()
+        self.is_bio_term()
         return self.features
 
     def vectorize(self):

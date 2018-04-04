@@ -15,6 +15,12 @@ config_params={
 "is_special_token",
 "first_name_lexicon",
 "last_name_lexicon",
+"journal_name_lexicon",
+"is_bio_term",
+"has_period_period",
+"has_period_comma",
+"is_url",
+"is_email"
 ],
 #Training params
 "epochs":100,
@@ -36,6 +42,14 @@ SORTED_FPERSON_FNAME="../../data/sorted-person-first.txt"
 SORTED_LPERSON_FNAME="../../data/sorted-person-last.txt"
 UNSRT_FPERSON_FNAME="../../data/person-first.txt"
 UNSRT_LPERSON_FNAME="../../data/person-last.txt"
+
+RAW_JNAMES="../../data/biomed_journals_unsrt.txt"
+UNSRT_JNAMES="../../data/journals-unsrt.txt"
+SORTED_JNAMES="../../data/sorted-journals.txt"
+VOCAB_JNAMES="../../data/vocab-journals.pickle"
+
+RAW_BIOTITLES="../../data/bio_titles.txt"
+BIO_SRT="../../data/bio-srt.pickle"
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
