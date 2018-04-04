@@ -92,12 +92,10 @@ grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars), max_grad_norm)
 optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 
 
-train_op = optimizer.apply_gradients(zip(grads, tvars),
-    global_step=tf.contrib.framework.get_or_create_global_step())
+train_op = optimizer.apply_gradients(zip(grads, tvars),global_step=tf.contrib.framework.get_or_create_global_step())
 
 #test on other data set (valid or test)
 def test_epoch(data_x,data_y):
-<<<<<<< HEAD
     fetches = [accuracy, cost, label_pred]
     data_size = data_y.shape[0]
     X_batch, y_batch = data_x,data_y
@@ -111,26 +109,10 @@ def test_epoch(data_x,data_y):
     ground_truth = np.reshape(ground_truth,(1,-1))
     ground_truth = np.squeeze(ground_truth)
     _scores = f1_score(ground_truth,pred, average='weighted')
-    return _accs, _costs, _scores
-=======
-	fetches = [accuracy, cost, label_pred]
-	data_size = data_y.shape[0]
-	X_batch, y_batch = data_x,data_y
-	feed_dict = {data:data_x, target:data_y, batch_size:data_size, keep_prob:1.0}
-	_accs, _costs, _pred = sess.run(fetches, feed_dict)
-	#F1 result
-	_pred = np.argmax(_pred, axis = 2)
-	pred = np.reshape(_pred,(1,-1))
-	pred = np.squeeze(pred)
-	ground_truth = np.argmax(data_y, axis = 2)
-	ground_truth = np.reshape(ground_truth,(1,-1))
-	ground_truth = np.squeeze(ground_truth)
-        _scores = f1_score(ground_truth,pred, average='weighted')
-        print('classification report')
-        print(classification_report(ground_truth, pred, target_names=target_names))
-	return _accs, _costs, _scores
->>>>>>> 843ca10a35d167afa7362d150a57aca9e8a93620
+    print('classification report')
+    print(classification_report(ground_truth,pred,target_names=target_names))
 
+    return _accs, _costs, _scores
 
 
 def get_random_batch(data_size,batch_size):
@@ -173,5 +155,7 @@ test_acc, test_cost,test_score = test_epoch(X_test,y_test)
 print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost, test_score)
 
 
-
+print '**DEV RESULT:'
+val_acc, val_cost, val_score= test_epoch(X_valid,y_valid)
+print '**Test %d, acc=%g, cost=%g, F1 score=%g' % (y_valid.shape[0], val_acc, val_cost, val_score)
 
