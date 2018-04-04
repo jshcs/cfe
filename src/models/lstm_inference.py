@@ -1,5 +1,6 @@
 import tensorflow as tf
 from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report
 import numpy as np
 from tensorflow.contrib import rnn
 import pickle
@@ -38,6 +39,8 @@ tr_batch_size = config_params["batch_size"]
 layer_num = config_params["num_layer"]
 decay_rate = config_params["lrate_decay"]
 max_grad_norm = 5.0
+target_names = ALL_TAGS
+target_names.append('unknown')
 
 
 lr = tf.placeholder(tf.float32, [])
@@ -94,6 +97,7 @@ train_op = optimizer.apply_gradients(zip(grads, tvars),
 
 #test on other data set (valid or test)
 def test_epoch(data_x,data_y):
+<<<<<<< HEAD
     fetches = [accuracy, cost, label_pred]
     data_size = data_y.shape[0]
     X_batch, y_batch = data_x,data_y
@@ -108,6 +112,24 @@ def test_epoch(data_x,data_y):
     ground_truth = np.squeeze(ground_truth)
     _scores = f1_score(ground_truth,pred, average='weighted')
     return _accs, _costs, _scores
+=======
+	fetches = [accuracy, cost, label_pred]
+	data_size = data_y.shape[0]
+	X_batch, y_batch = data_x,data_y
+	feed_dict = {data:data_x, target:data_y, batch_size:data_size, keep_prob:1.0}
+	_accs, _costs, _pred = sess.run(fetches, feed_dict)
+	#F1 result
+	_pred = np.argmax(_pred, axis = 2)
+	pred = np.reshape(_pred,(1,-1))
+	pred = np.squeeze(pred)
+	ground_truth = np.argmax(data_y, axis = 2)
+	ground_truth = np.reshape(ground_truth,(1,-1))
+	ground_truth = np.squeeze(ground_truth)
+        _scores = f1_score(ground_truth,pred, average='weighted')
+        print('classification report')
+        print(classification_report(ground_truth, pred, target_names=target_names))
+	return _accs, _costs, _scores
+>>>>>>> 843ca10a35d167afa7362d150a57aca9e8a93620
 
 
 
