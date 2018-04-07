@@ -155,7 +155,7 @@ class Features():
             self.last_name_lexicon(tok)
             self.journal_lexicon(tok)
             self.is_bio_term(tok)
-        return self.features
+        return np.array(self.features)
 
     def vectorize(self):
         #fDict = self.get_features()
