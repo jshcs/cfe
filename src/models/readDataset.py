@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from config import *
 from umass_parser import *
-from features import *
+from features_tokens import *
 
 def read_dataset(data_type):
     Data = get_data(data_type)

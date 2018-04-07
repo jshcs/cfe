@@ -1,26 +1,26 @@
 #Features
 config_params={
 "feature_names":[
-"is_all_caps",
-"is_capitalized",
-"is_alpha_num",
-"word_length",
-"is_number",
-"ends_with_period",
-"enclosed_brackets",
-"has_hyphen",
-"has_colon",
-"is_etal",
-"is_valid_year",
-"is_special_token",
-"first_name_lexicon",
-"last_name_lexicon",
-"journal_name_lexicon",
-"is_bio_term",
-"has_period_period",
-"has_period_comma",
-"is_url",
-"is_email"
+"is_all_caps", #0
+"is_capitalized", #1
+"is_alpha_num", #2
+"word_length", #3
+"is_number", #4
+"ends_with_period", #5
+"enclosed_brackets", #6
+"has_hyphen", #7
+"has_colon", #8
+"is_etal", #9
+"is_valid_year", #10
+"is_special_token", #11
+"has_period_period", #12
+"has_period_comma", #13
+"is_url", #14
+"is_email", #15
+"first_name_lexicon", #16
+"last_name_lexicon", #17
+"journal_name_lexicon", #18
+"is_bio_term" #19
 ],
 #Training params
 "epochs":100,
