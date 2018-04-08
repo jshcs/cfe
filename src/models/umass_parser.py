@@ -6,7 +6,7 @@ from config import *
 class GetDict():
     def __init__(self,filename):
         with open(filename,'r') as f:
-            self.content=f.readlines()[:300]
+            self.content=f.readlines()[:10]
         self.labels=[]
         self.citation_strings=[]
         self.token_label={}
@@ -27,21 +27,24 @@ class GetDict():
                     if ele.tag!='NODE':
                         if 'person' in ele.tag:
                             txt=ele.text.strip().split(" ")
-                            txt=[t for t in txt if t not in PUNCT]
+                            txt=[t for t in txt if t not in PUNCT and len(t)>=1]
                             #print txt
                             for t in txt:
                                 #if t not in PUNCT:
                                 temp_dict[t]='person'
-                                tmp_labels.append('person')
+                                tmp_labels.append(labels['person'])
                                 # else:
                                 # 	print t
                         else:
                             txt=ele.text.strip().split(" ")
-                            txt=[t for t in txt if t not in PUNCT]
+                            txt=[t for t in txt if t not in PUNCT and len(t)>=1]
                             for t in txt:
                                 #if t not in PUNCT:
                                 temp_dict[t]=ele.tag
-                                tmp_labels.append(ele.tag)
+                                if ele.tag not in labels:
+                                    tmp_labels.append(len(labels))
+                                else:
+                                    tmp_labels.append(labels[ele.tag])
                                 # else:
                                 # 	print t
                         curr_sentence=curr_sentence+txt
