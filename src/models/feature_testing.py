@@ -1,4 +1,4 @@
-from features import *
+from features_tokens import *
 from config import *
 from utils import *
 import pickle
@@ -8,18 +8,24 @@ with open(VOCAB_JNAMES,'rb') as v:
 with open(BIO_SRT,'rb') as v:
     all_bio_vocab=pickle.load(v)
 
-token="https://www.google.com"
+token=["McCallum","A.","The","Best", "Neurons.","Nature" ,"Mind","vol. 1", "pg. 110-120","https://www.google.com"]
 
 t=Features(token,all_vocab,all_bio_vocab)
 f=t.get_features()
+vectors=t.vectorize()
 
+print token
 print "Total features:",len(f)
 print
 print f
 print
+print config_params["feature_names"]
+print
 print "The key-value pairs are:"
 print
-print t.vectorize()
+print vectors
+
+print type(vectors)
 
 '''
 Total features: 14
