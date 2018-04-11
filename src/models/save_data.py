@@ -35,7 +35,7 @@ def main():
         pickle.dump(val_label, outp)
 
     print 'test'
-    print np.array(val_token).shape,np.array(val_label).shape
+    print test_token.shape,test_label.shape
     with open('../../data/test.pickle', 'wb') as outp:
         pickle.dump(np.array(test_token), outp)
         pickle.dump(np.array(test_label), outp)

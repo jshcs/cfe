@@ -177,7 +177,7 @@ class Features():
 
     def journal_lexicon(self,token): #18
         # s=time.time()
-        if self.sentence[token].lower() in self.jnames_vocab:
+        if binary_search(self.jnames_vocab,self.sentence[token].lower(),0,len(self.jnames_vocab)-1):
             self.features[token][18]=True
         else:
             for w in self.jnames_vocab:
@@ -190,8 +190,8 @@ class Features():
 
     def is_bio_term(self,token): #19
         #s=time.time()
-        if self.sentence[token].lower() in self.bioterms_vocab:
-            self.features[token][19]=True
+        # if self.sentence[token].lower() in self.bioterms_vocab:
+        #     self.features[token][19]=True
         # else:
         # for w in self.bioterms_vocab:
         #     if len(w)>=len(token):
@@ -200,6 +200,7 @@ class Features():
         #             break
         # e=time.time()
         # self.times.append(e-s)
+        self.features[token][19]=binary_search(self.bioterms_vocab,self.sentence[token].lower(),0,len(self.bioterms_vocab)-1)
 
     def get_features(self):
         for tok in range(len(self.sentence)):

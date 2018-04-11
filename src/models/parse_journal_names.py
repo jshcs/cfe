@@ -15,13 +15,26 @@ def parse_raw():
             get_line=line.split(":")
             f_unsrt.write(get_line[1].lower())
 
+# def get_vocab(infile,outfile):
+#     vocab=[]
+#     f=open(infile,'r')
+#     for line in f:
+#         vocab+=line.split(" ")
+#     vocab=list(set([x.strip("\n") for x in vocab]))
+#
+#     vocab.sort()
+#     print len(vocab)
+#     #print vocab
+#     with open(outfile,'w') as vc:
+#         pickle.dump(vocab,vc)
+
 def get_vocab(infile,outfile):
     vocab=[]
     f=open(infile,'r')
     for line in f:
         vocab+=line.split(" ")
-    vocab=list(set([x.strip("\n") for x in vocab]))
-
+    vocab=list(set([x.strip("\n").lower() for x in vocab]))
+    print len(vocab)
     vocab.sort()
     print len(vocab)
     #print vocab

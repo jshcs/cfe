@@ -24,11 +24,11 @@ config_params={
 ],
 #Training params
 "epochs":100,
-"lrate":5e-4,
-"lrate_decay":0.7,
+"lrate":5e-3,
+"lrate_decay":0.9,
 "do_bnorm":True,
 "do_dropout":True,
-"max_stream_length":25,
+"max_stream_length":50,
 "num_units":128,
 "batch_size":20,
 "num_layer":1,
@@ -48,8 +48,9 @@ UNSRT_JNAMES="../../data/journals-unsrt.txt"
 SORTED_JNAMES="../../data/sorted-journals.txt"
 VOCAB_JNAMES="../../data/vocab-journals.pickle"
 
-RAW_BIOTITLES="../../data/bio_titles.txt"
+RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
+BIO_TITLES="../../data/bio_titles.txt"
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
