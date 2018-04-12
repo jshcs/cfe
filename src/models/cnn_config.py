@@ -24,11 +24,11 @@ config_params={
 ],
 #Training params
 "epochs":120,
-"lrate":5e-4,
+"lrate":6e-4,
 "lrate_decay":0.7,
 "do_bnorm":True,
 "do_dropout":True,
-"max_stream_length":25,
+"max_stream_length":50,
 "num_units":128,
 "batch_size":20,
 "num_layer":1,
