@@ -23,9 +23,9 @@ config_params={
 "is_bio_term" #19
 ],
 #Training params
-"epochs":100,
-"lrate":5e-3,
-"lrate_decay":0.9,
+"epochs":120,
+"lrate":0.00075,
+"lrate_decay":0.85,
 "do_bnorm":True,
 "do_dropout":True,
 "max_stream_length":50,
@@ -47,6 +47,8 @@ RAW_JNAMES="../../data/biomed_journals_unsrt.txt"
 UNSRT_JNAMES="../../data/journals-unsrt.txt"
 SORTED_JNAMES="../../data/sorted-journals.txt"
 VOCAB_JNAMES="../../data/vocab-journals.pickle"
+COMBINED_JNAMES="../../data/combined-journals.txt"
+
 
 RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
@@ -61,3 +63,5 @@ labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
 BRACKETS={'(':')','[':']','{':'}'}
 
 SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
+
+MAX_WINDOW=5

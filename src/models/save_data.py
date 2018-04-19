@@ -17,26 +17,26 @@ def main():
     batch_size = config_params["batch_size"]
 
     #reading data
-    train_token,train_label = read_dataset("train")
-    val_token,val_label = read_dataset("dev")
+    #train_token,train_label = read_dataset("train")
+    #val_token,val_label = read_dataset("dev")
     test_token,test_label = read_dataset("test")
 
-    print 'writing'
-    print 'train'
-    print train_token.shape,train_label.shape
-    with open('../../data/train.pkl', 'wb') as outp:
-        pickle.dump(train_token, outp)
-        pickle.dump(train_label, outp)
-
-    print 'val'
-    print val_token.shape,val_label.shape
-    with open('../../data/val.pkl', 'wb') as outp:
-        pickle.dump(val_token, outp)
-        pickle.dump(val_label, outp)
+    # print 'writing'
+    # print 'train'
+    # print train_token.shape,train_label.shape
+    # with open('../../data/train_exp.pkl', 'wb') as outp:
+    #     pickle.dump(train_token, outp)
+    #     pickle.dump(train_label, outp)
+    #
+    # print 'val'
+    # print val_token.shape,val_label.shape
+    # with open('../../data/val_exp.pkl', 'wb') as outp:
+    #     pickle.dump(val_token, outp)
+    #     pickle.dump(val_label, outp)
 
     print 'test'
     print test_token.shape,test_label.shape
-    with open('../../data/test.pickle', 'wb') as outp:
+    with open('../../data/test_exp.pickle', 'wb') as outp:
         pickle.dump(np.array(test_token), outp)
         pickle.dump(np.array(test_label), outp)
 

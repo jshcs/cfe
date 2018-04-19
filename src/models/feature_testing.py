@@ -7,10 +7,16 @@ with open(VOCAB_JNAMES,'rb') as v:
     all_vocab=pickle.load(v)
 with open(BIO_SRT,'rb') as v:
     all_bio_vocab=pickle.load(v)
+sorted_fname=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
+sorted_lname=read_sorted_file_into_array(SORTED_LPERSON_FNAME)
+bio_dict={voc:1 for voc in all_bio_vocab}
+journal_dict={voc:1 for voc in all_vocab}
 
+sorted_journals=read_sorted_file_into_array(SORTED_JNAMES)
+print "Data extracted....."
 token=["McCallum","A.","The","Best", "Neurons.","Nature" ,"Mind","vol. 1", "pg. 110-120","https://www.google.com"]
 
-t=Features(token,all_vocab,all_bio_vocab)
+t=Features(token,sorted_fname,sorted_lname,journal_dict,bio_dict,sorted_journals)
 f=t.get_features()
 vectors=t.vectorize()
 
