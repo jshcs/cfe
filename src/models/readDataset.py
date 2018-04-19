@@ -59,6 +59,41 @@ def read_dataset(data_type):
         print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
     return np.array(data_feature),np.array(data_target)
 
+def read_bibtex_dataset(Data):
+    c=0
+    data_feature=[]
+    data_target=[]
+    total_time=0
+    for s in Data:
+        start=time.time()
+        c+=1
+        tokensStr = Data[s][0]
+        labelsStr = Data[s][1]
+        len_string=len(tokensStr)
+        if len(tokensStr)<config_params["max_stream_length"]:
+            diff=config_params["max_stream_length"]-len(tokensStr)
+            tokensStr+=['<UNK>']*(diff)
+            labelsStr+=[len(labels)]*diff
+
+        elif len(tokensStr)>config_params["max_stream_length"]:
+            tokensStr=tokensStr[:config_params["max_stream_length"]]
+            labelsStr=labelsStr[:config_params["max_stream_length"]]
+        #print tokensStr
+        features_sentence=Features(tokensStr,sorted_fname,sorted_lname,bio_dict,sorted_journals_db)
+        # print s
+        # print
+
+        vectorized_features=features_sentence.get_features()
+        # print vectorized_features
+        labelsStr=np.array(labelsStr)
+        onehot_labels=np.eye(len(labels)+1)[labelsStr]
+        data_feature.append(vectorized_features)
+        data_target.append(onehot_labels)
+        end_time=time.time()
+        total_time+=(end_time-start)
+        print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
+    return np.array(data_feature),np.array(data_target)
+
 # s=time.time()
 # r=read_dataset("train")
 # e=time.time()
