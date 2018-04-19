@@ -278,7 +278,7 @@ class Features():
                 # print (e1-s),(e2-s),(e3-s),(e4-s),(e5-s),(e6-s),(e7-s),(e8-s),(e9-s),(e10-s),(e11-s),(e12-s),(e13-s),(e14-s),(e15-s),(e16-s),(e17-s),(e18-s),(e19-s),(e20-s),
                 # print
                 # print
-        print e
+        #print e
         return self.features
 
     def vectorize(self):

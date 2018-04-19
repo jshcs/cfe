@@ -61,8 +61,8 @@ BIO_TITLES="../../data/bio_titles.txt"
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
-styleFile = ['biochem','bmc-mathphys','mit-chicago','natbib','siamplain','spbasic','vancouver']
-
+#styleFile = #['biochem','bmc-mathphys','achemso','ajhg',['mit-chicago','natbib','siamplain','spbasic']
+styleFile = ['mit-chicago','natbib','siamplain','spbasic']
 PUNCT=[".",",",";",":"]
 
 labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
