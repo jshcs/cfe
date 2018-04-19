@@ -1,7 +1,5 @@
 import numpy as np
 
-styleFile = ['biochem','bmc-mathphys','mit-chicago','natbib','siamplain','spbasic','vancouver']
-
 Bibtexlabels = {'author':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
 
 data_dir = '../../data/'
