@@ -10,15 +10,15 @@ from features import *
 from readDataset import *
 
 #loading data
-with open('../../data/train.pkl', 'rb') as inp:
+with open('../../data/train_exp.pkl', 'rb') as inp:
     X_train = pickle.load(inp)
     y_train = pickle.load(inp)
 
-with open('../../data/val.pkl', 'rb') as inp:
+with open('../../data/val_exp.pkl', 'rb') as inp:
     X_valid = pickle.load(inp)
     y_valid = pickle.load(inp)
 
-with open('../../data/test.pickle', 'rb') as inp:
+with open('../../data/test_exp.pickle', 'rb') as inp:
     X_test = pickle.load(inp)
     y_test = pickle.load(inp)
 

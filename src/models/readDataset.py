@@ -5,17 +5,21 @@ from umass_parser import *
 from features_tokens import *
 import pickle
 import time
+import simstring
 
-with open(VOCAB_JNAMES,'rb') as v:
-    all_vocab=pickle.load(v)
+# with open(VOCAB_JNAMES,'rb') as v:
+#     all_vocab=pickle.load(v)
 with open(BIO_SRT,'rb') as v:
     all_bio_vocab=pickle.load(v)
 sorted_fname=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
 sorted_lname=read_sorted_file_into_array(SORTED_LPERSON_FNAME)
 bio_dict={voc:1 for voc in all_bio_vocab}
-journal_dict={voc:1 for voc in all_vocab}
+# journal_dict={voc:1 for voc in all_vocab}
 
-sorted_journals=read_sorted_file_into_array(COMBINED_JNAMES)
+#sorted_journals=read_sorted_file_into_array(COMBINED_JNAMES)
+sorted_journals_db=simstring.reader(DB_JNAMES)
+sorted_journals_db.measure=SS_METRIC
+sorted_journals_db.threshold=SS_THRESHOLD
 # sorted_journals=[[t.lower() for t in ele.split()] for ele in sorted_journals]
 #print sorted_journals
 
@@ -40,7 +44,7 @@ def read_dataset(data_type):
             tokensStr=tokensStr[:config_params["max_stream_length"]]
             labelsStr=labelsStr[:config_params["max_stream_length"]]
         #print tokensStr
-        features_sentence=Features(tokensStr,sorted_fname,sorted_lname,journal_dict,bio_dict,sorted_journals)
+        features_sentence=Features(tokensStr,sorted_fname,sorted_lname,bio_dict,sorted_journals_db)
         # print s
         # print
 

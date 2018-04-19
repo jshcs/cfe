@@ -1,4 +1,5 @@
 #Features
+import simstring
 config_params={
 "feature_names":[
 "is_all_caps", #0
@@ -23,8 +24,8 @@ config_params={
 "is_bio_term" #19
 ],
 #Training params
-"epochs":120,
-"lrate":0.00075,
+"epochs":50,
+"lrate":0.0075,
 "lrate_decay":0.85,
 "do_bnorm":True,
 "do_dropout":True,
@@ -49,6 +50,8 @@ SORTED_JNAMES="../../data/sorted-journals.txt"
 VOCAB_JNAMES="../../data/vocab-journals.pickle"
 COMBINED_JNAMES="../../data/combined-journals.txt"
 
+DB_JNAMES="../../data/journal_db/db-journals.db"
+
 
 RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
@@ -65,3 +68,6 @@ BRACKETS={'(':')','[':']','{':'}'}
 SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
 
 MAX_WINDOW=5
+
+SS_METRIC=simstring.jaccard
+SS_THRESHOLD=0.4

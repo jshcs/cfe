@@ -4,97 +4,16 @@ import datetime
 import numpy as np
 import validators
 import time
-
-# def Features(sentence,fname_list,lname_list,vocab_journals,vocab_bioterms):
-#     features=[]
-#     for tok in sentence:
-#         features.append([False for i in range(len(config_params['feature_names']))])
-#
-#     for token in range(len(sentence)):
-#         if sentence[token]=='<UNK>':
-#             continue
-#         else:
-#             #is_all_caps
-#             features[token][0]=sentence[token].isupper()
-#             #is_capitalized
-#             features[token][1]=sentence[token][0].isupper()
-#             #is_alpha_num
-#             features[token][2]=sentence[token].isalnum()
-#             #word_length
-#             features[token][3]=len(sentence[token])
-#             #is_number
-#             features[token][4]=sentence[token].isdigit()
-#             #ends_with_period
-#             features[token][5]=sentence[token][-1]=='.'
-#             #enclosed_brackets
-#             if sentence[token][0] in BRACKETS:
-#                 if sentence[token][-1]==BRACKETS[sentence[token][0]]:
-#                     features[token][6]=True
-#                 else:
-#                     features[token][6]=False
-#             else:
-#                 features[token][6]=False
-#             #has_hyphen
-#             features[token][7]=binary_search(sorted(sentence[token]),'-',0,len(sentence[token])-1)
-#
-#             #has_colon
-#             features[token][8]=binary_search(sorted(sentence[token]),':',0,len(sentence[token])-1)
-#             #is_etal
-#             features[token][9]=sentence[token]=='et' or sentence[token]=='al'
-#             #is_valid_year
-#             features[token][10]=features[token][4] and features[token][3]<=4 and 1<=int(sentence[token])<=datetime.datetime.now().year or ((sentence[token][0]=='`' or sentence[token][0]=="'") and sentence[token][1:].isdigit() and features[token][3]==3 and 1<=int(sentence[token][1:])<=datetime.datetime.now().year)
-#             #is_special_token
-#             features[token][11]=binary_search(SPCL_KEYS,sentence[token],0,len(SPCL_KEYS)-1)
-#             #has_period_period
-#             if ".." in sentence[token]:
-#                 features[token][12]=True
-#             #has_period_comma
-#             if ".," in sentence[token]:
-#                 features[token][13]=True
-#             #is_url
-#             if validators.url(sentence[token]):
-#                 features[token][14]=True
-#             #is_email
-#             if validators.email(sentence[token]):
-#                 features[token][15]=True
-#             #first_name_lexicon
-#             if len(sentence[token])==2 and features[token][1] and features[token][5]:
-#                 features[token][16]=True
-#                 # e=time.time()
-#                 # self.times.append(e-s)
-#             else:
-#                 start=0
-#                 end=len(fname_list)-1
-#                 features[token][16]=binary_search(fname_list,sentence[token].upper(),start,end)
-#             #last_name_lexicon
-#             start=0
-#             end=len(lname_list)-1
-#             features[token][17]=binary_search(lname_list,sentence[token].upper(),start,end)
-#
-#             #journal_lexicon
-#             if binary_search(vocab_journals,sentence[token].lower(),0,len(vocab_journals)-1):
-#                 features[token][18]=True
-#             else:
-#                 for w in vocab_journals:
-#                     if len(w)>=len(sentence[token]):
-#                         if float(longest_common_substring(sentence[token].lower(),w))/max(len(sentence[token]),len(w))>=0.6:
-#                             features[token][18]=True
-#                             break
-#
-#
-#             #is_bio_term
-#             features[token][19]=binary_search(vocab_bioterms,sentence[token].lower(),0,len(vocab_bioterms)-1)
-#     return features
-
+import simstring
 
 
 class Features():
-    def __init__(self,sentence,fname_list,lname_list,vocab_journals,vocab_bioterms,sorted_journals):
+    def __init__(self,sentence,fname_list,lname_list,vocab_bioterms,sorted_journals_db):
         #self.token=token
-        self.jnames_vocab=vocab_journals
+        #self.jnames_vocab=vocab_journals
         self.bioterms_vocab=vocab_bioterms
-        len_sorted_journals=len(sorted_journals)
-        self.sorted_journals_1=sorted_journals
+        #len_sorted_journals=len(sorted_journals)
+        self.db=sorted_journals_db
         #self.sorted_journals_2=sorted_journals[len_sorted_journals/2:]
         #self.sorted_journals_3=sorted_journals[2*len_sorted_journals/3:]
         #self.features={k:False for k in config_params['feature_names']}
@@ -194,7 +113,7 @@ class Features():
 
     def is_valid_year(self,token): #10
         # s=time.time()
-        self.features[token][10]=self.features[token][4] and self.features[token][3]<=4 and 1<=int(self.sentence[token])<=datetime.datetime.now().year or ((self.sentence[token][0]=='`' or self.sentence[token][0]=="'") and self.sentence[token][1:].isdigit() and self.features[token][3]==3 and 1<=int(self.sentence[token][1:])<=datetime.datetime.now().year)
+        self.features[token][10]=self.features[max(0,token-1)][11] or self.features[token][4] and self.features[token][3]<=4 and 1<=int(self.sentence[token])<=datetime.datetime.now().year or ((self.sentence[token][0]=='`' or self.sentence[token][0]=="'") and self.sentence[token][1:].isdigit() and self.features[token][3]==3 and 1<=int(self.sentence[token][1:])<=datetime.datetime.now().year)
         # e=time.time()
         # self.times.append(e-s)
         #return (self.is_number(token) and self.word_length(token)<=4 and 1<=int(token)<=datetime.datetime.now().year) or ((token[0]=='`' or token[0]=="'") and self.word_length(token)==3 and 1<=int(token[1:])<=datetime.datetime.now().year)
@@ -280,36 +199,29 @@ class Features():
         present=False
         upper=token
         for win in range(1,MAX_WINDOW):
-            if token+win+1<=len(self.sentence):
-                ss=[s.lower() for s in self.sentence[token:token+win+1] if s!="<UNK>"]
-                substr=' '.join(ss)
-                present=binary_search_with_fuzzing(self.sorted_journals_1,str(substr),0,len(self.sorted_journals_1)-1,0.5)
-                if present==True:
-                    print "****",substr
-                    upper=win+token
+            #if token+win+1<=len(self.sentence):
+            ss=[s.lower() for s in self.sentence[token:min(token+win+1,len(self.sentence))] if s!="<UNK>"]
+            substr=' '.join(ss)
+            # present=binary_search_with_fuzzing(self.sorted_journals_1,str(substr),0,len(self.sorted_journals_1)-1,0.5)
+            # if present==True:
+            #     #print "****",substr
+            #     upper=win+token
+            if len(self.db.retrieve(str(substr)))>0:
+                upper=win+token
+                present=True
+                #print "****",str(substr)
+
         if present:
             #print token,upper
-            if upper+1<=len(self.sentence):
-                for i in range(token,upper+1):
-                    self.features[i][18]=True
-            else:
-                upper-=1
-                for i in range(token,upper+1):
-                    self.features[i][18]=True
+            #if upper+1<=len(self.sentence):
+            for i in range(token,min(upper+1,len(self.sentence))):
+                self.features[i][18]=True
+            # else:
+            #     upper-=1
+            #     for i in range(token,upper+1):
+            #         self.features[i][18]=True
 
     def is_bio_term(self,token): #19
-        #s=time.time()
-        # if self.sentence[token].lower() in self.bioterms_vocab:
-        #     self.features[token][19]=True
-        # else:
-        # for w in self.bioterms_vocab:
-        #     if len(w)>=len(token):
-        #         if float(longest_common_substring(token.lower(),w))/max(len(token),len(w))>=0.6:
-        #             self.features[self.sentence.index(token)][19]=True
-        #             break
-        # e=time.time()
-        # self.times.append(e-s)
-        #self.features[token][19]=binary_search(self.bioterms_vocab,self.sentence[token].lower(),0,len(self.bioterms_vocab)-1)
         self.features[token][19]=self.sentence[token].lower() in self.bioterms_vocab
 
 
@@ -370,9 +282,6 @@ class Features():
         return self.features
 
     def vectorize(self):
-        #fDict = self.get_features()
-
-
         v = np.array(self.features)
 
         return v

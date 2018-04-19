@@ -49,5 +49,5 @@ def get_vocab(infile,outfile):
 
 
 #get_vocab(f_srt,VOCAB_JNAMES)
-#get_vocab(RAW_BIOTITLES,BIO_SRT)
-parse_raw()
+get_vocab(RAW_BIOTITLES,BIO_SRT)
+#parse_raw()
