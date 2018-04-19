@@ -31,8 +31,8 @@ def dict_of_style(style):
         labelList = []
         for j in range(len(pairs[i])):
             tokenList.append(pairs[i][j][0])
-            if pairs[i][j][1] in labels:
-                labelList.append(labels[pairs[i][j][1]])
+            if pairs[i][j][1] in Bibtexlabels:
+                labelList.append(Bibtexlabels[pairs[i][j][1]])
             else:
                 labelList.append(6)
         trainData[strings[i]] = (tokenList,labelList)
@@ -42,8 +42,8 @@ def dict_of_style(style):
         labelList = []
         for j in range(len(pairs[i])):
             tokenList.append(pairs[i][j][0])
-            if pairs[i][j][1] in labels:
-                labelList.append(labels[pairs[i][j][1]])
+            if pairs[i][j][1] in Bibtexlabels:
+                labelList.append(labels[Bibtexlabels[i][j][1]])
             else:
                 labelList.append(6)
         valData[strings[i]] = (tokenList,labelList)
@@ -53,8 +53,8 @@ def dict_of_style(style):
         labelList = []
         for j in range(len(pairs[i])):
             tokenList.append(pairs[i][j][0])
-            if pairs[i][j][1] in labels:
-                labelList.append(labels[pairs[i][j][1]])
+            if pairs[i][j][1] in Bibtexlabels:
+                labelList.append(labels[Bibtexlabels[i][j][1]])
             else:
                 labelList.append(6)
         testData[strings[i]] = (tokenList,labelList)
