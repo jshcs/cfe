@@ -24,15 +24,17 @@ config_params={
 "is_bio_term" #19
 ],
 #Training params
-"epochs":50,
-"lrate":0.0075,
-"lrate_decay":0.85,
+"epochs":120,
+"lrate":6e-4,
+"lrate_decay":0.7,
 "do_bnorm":True,
 "do_dropout":True,
-"max_stream_length":50,
+"max_stream_length":110,
 "num_units":128,
 "batch_size":20,
 "num_layer":1,
+"filter_width":3,
+"repeat_times":4
 }
 
 TRAIN_FILE='../../data/umass_cfe/training.docs'
@@ -58,6 +60,8 @@ BIO_SRT="../../data/bio-srt.pickle"
 BIO_TITLES="../../data/bio_titles.txt"
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
+
+styleFile = ['biochem','bmc-mathphys','mit-chicago','natbib','siamplain','spbasic','vancouver']
 
 PUNCT=[".",",",";",":"]
 
