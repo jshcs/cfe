@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+from bibtex2Dict import *
 import numpy as np
 from config import *
 from umass_parser import *
@@ -16,44 +16,56 @@ def main():
     epochs = config_params["epochs"]
     batch_size = config_params["batch_size"]
 
-    #reading data
-    train_token,train_label = read_dataset("train")
-    val_token,val_label = read_dataset("dev")
-    test_token,test_label = read_dataset("test")
+    # reading umass data
+    # train_token,train_label = read_dataset("train")
+    # val_token,val_label = read_dataset("dev")
+    # test_token,test_label = read_dataset("test")
 
     print 'writing'
-    print 'train'
-    print train_token.shape,train_label.shape
-    with open('../../data/train.pkl', 'wb') as outp:
-        pickle.dump(train_token, outp)
-        pickle.dump(train_label, outp)
-
-    print 'val'
-    print val_token.shape,val_label.shape
-    with open('../../data/val.pkl', 'wb') as outp:
-        pickle.dump(val_token, outp)
-        pickle.dump(val_label, outp)
-
-    print 'test'
-    print np.array(val_token).shape,np.array(val_label).shape
-    with open('../../data/test.pickle', 'wb') as outp:
-        pickle.dump(np.array(test_token), outp)
-        pickle.dump(np.array(test_label), outp)
-
-    # print 'reading'
-    #
-    # with open('../../data/train.pkl', 'rb') as inp:
-    # X_train = pickle.load(inp)
-    # y_train = pickle.load(inp)
     # print 'train'
-    # print X_train.shape,y_train.shape
+    # print train_token.shape,train_label.shape
+    # with open('../../data/umass_train.pkl', 'wb') as outp:
+    #     pickle.dump(train_token, outp)
+    #     pickle.dump(train_label, outp)
     #
-    # with open('../../data/val.pkl', 'rb') as inp:
-    # 	X_valid = pickle.load(inp)
-    # y_valid = pickle.load(inp)
     # print 'val'
-    # print X_valid.shape,y_valid.shape
+    # print val_token.shape,val_label.shape
+    # with open('../../data/umass_val.pkl', 'wb') as outp:
+    #     pickle.dump(val_token, outp)
+    #     pickle.dump(val_label, outp)
+    #
+    # print 'test'
+    # print test_token.shape,test_label.shape
+    # with open('../../data/umass_test.pickle', 'wb') as outp:
+    #     pickle.dump(np.array(test_token), outp)
+    #     pickle.dump(np.array(test_label), outp)
+    #
+    # # reading bibtex data
 
+    for style in styleFile:
+        trainDict,valDict,testDict = dict_of_style(style)
+        train_token,train_label = read_bibtex_dataset(trainDict)
+        val_token,val_label = read_bibtex_dataset(valDict)
+        test_token,test_label = read_bibtex_dataset(testDict)
+
+        print 'writing'
+        print 'train'
+        print train_token.shape,train_label.shape
+        with open('../../data/'+style+'_train.pkl', 'wb') as outp:
+            pickle.dump(train_token, outp)
+            pickle.dump(train_label, outp)
+
+        print 'val'
+        print val_token.shape,val_label.shape
+        with open('../../data/'+style+'_val.pkl', 'wb') as outp:
+            pickle.dump(val_token, outp)
+            pickle.dump(val_label, outp)
+
+        print 'test'
+        print test_token.shape,test_label.shape
+        with open('../../data/'+style+'_test.pickle', 'wb') as outp:
+            pickle.dump(np.array(test_token), outp)
+            pickle.dump(np.array(test_label), outp)
 
 if __name__ == '__main__':
     main()

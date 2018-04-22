@@ -4,12 +4,18 @@ import datetime
 import numpy as np
 import validators
 import time
+import simstring
+
 
 class Features():
-    def __init__(self,sentence,fname_list,lname_list,vocab_journals,vocab_bioterms):
+    def __init__(self,sentence,fname_list,lname_list,vocab_bioterms,sorted_journals_db):
         #self.token=token
-        self.jnames_vocab=vocab_journals
+        #self.jnames_vocab=vocab_journals
         self.bioterms_vocab=vocab_bioterms
+        #len_sorted_journals=len(sorted_journals)
+        self.db=sorted_journals_db
+        #self.sorted_journals_2=sorted_journals[len_sorted_journals/2:]
+        #self.sorted_journals_3=sorted_journals[2*len_sorted_journals/3:]
         #self.features={k:False for k in config_params['feature_names']}
         self.features=[]
         self.sentence=sentence
@@ -107,7 +113,7 @@ class Features():
 
     def is_valid_year(self,token): #10
         # s=time.time()
-        self.features[token][10]=self.features[token][4] and self.features[token][3]<=4 and 1<=int(self.sentence[token])<=datetime.datetime.now().year or ((self.sentence[token][0]=='`' or self.sentence[token][0]=="'") and self.sentence[token][1:].isdigit() and self.features[token][3]==3 and 1<=int(self.sentence[token][1:])<=datetime.datetime.now().year)
+        self.features[token][10]=self.features[max(0,token-1)][11] or self.features[token][4] and self.features[token][3]<=4 and 1<=int(self.sentence[token])<=datetime.datetime.now().year or ((self.sentence[token][0]=='`' or self.sentence[token][0]=="'") and self.sentence[token][1:].isdigit() and self.features[token][3]==3 and 1<=int(self.sentence[token][1:])<=datetime.datetime.now().year)
         # e=time.time()
         # self.times.append(e-s)
         #return (self.is_number(token) and self.word_length(token)<=4 and 1<=int(token)<=datetime.datetime.now().year) or ((token[0]=='`' or token[0]=="'") and self.word_length(token)==3 and 1<=int(token[1:])<=datetime.datetime.now().year)
@@ -175,87 +181,107 @@ class Features():
         # e=time.time()
         # self.times.append(e-s)
 
-    def journal_lexicon(self,token): #18
-        # s=time.time()
-        if self.sentence[token].lower() in self.jnames_vocab:
-            self.features[token][18]=True
-        else:
-            for w in self.jnames_vocab:
-                if len(w)>=len(self.sentence[token]):
-                    if float(longest_common_substring(self.sentence[token].lower(),w))/max(len(self.sentence[token]),len(w))>=0.6:
-                        self.features[token][18]=True
-                        break
+    # def journal_lexicon(self,token): #18
+    #     # s=time.time()
+    #     # if binary_search(self.jnames_vocab,self.sentence[token].lower(),0,len(self.jnames_vocab)-1):
+    #     if self.sentence[token].lower() in self.jnames_vocab:
+    #         self.features[token][18]=True
+    #     else:
+    #         for w in self.jnames_vocab.keys():
+    #             if len(w)>=len(self.sentence[token]):
+    #                 if float(longest_common_substring(self.sentence[token].lower(),w))/max(len(self.sentence[token]),len(w))>=0.6:
+    #                     self.features[token][18]=True
+    #                     break
         # e=time.time()
         # self.times.append(e-s)
+
+    def journal_lexicon(self,token): #18
+        present=False
+        upper=token
+        for win in range(1,MAX_WINDOW):
+            #if token+win+1<=len(self.sentence):
+            ss=[s.lower() for s in self.sentence[token:min(token+win+1,len(self.sentence))] if s!="<UNK>"]
+            substr=' '.join(ss)
+            # present=binary_search_with_fuzzing(self.sorted_journals_1,str(substr),0,len(self.sorted_journals_1)-1,0.5)
+            # if present==True:
+            #     #print "****",substr
+            #     upper=win+token
+            if len(self.db.retrieve(str(substr)))>0:
+                upper=win+token
+                present=True
+                #print "****",str(substr)
+
+        if present:
+            #print token,upper
+            #if upper+1<=len(self.sentence):
+            for i in range(token,min(upper+1,len(self.sentence))):
+                self.features[i][18]=True
+            # else:
+            #     upper-=1
+            #     for i in range(token,upper+1):
+            #         self.features[i][18]=True
 
     def is_bio_term(self,token): #19
-        #s=time.time()
-        if self.sentence[token].lower() in self.bioterms_vocab:
-            self.features[token][19]=True
-        # else:
-        # for w in self.bioterms_vocab:
-        #     if len(w)>=len(token):
-        #         if float(longest_common_substring(token.lower(),w))/max(len(token),len(w))>=0.6:
-        #             self.features[self.sentence.index(token)][19]=True
-        #             break
-        # e=time.time()
-        # self.times.append(e-s)
+        self.features[token][19]=self.sentence[token].lower() in self.bioterms_vocab
+
 
     def get_features(self):
+        e=[0 for i in range(len(config_params["feature_names"]))]
+        c=0
         for tok in range(len(self.sentence)):
             if self.sentence[tok]=='<UNK>':
                 continue
             else:
-                #s=time.time()
+                c+=1
+                s=time.time()
                 self.is_all_caps(tok)
-                #e1=time.time()
+                e[0]+=(time.time()-s)
                 self.is_capitalized(tok)
-                #e2=time.time()
+                e[1]+=(time.time()-s)
                 self.is_alpha_num(tok)
-                # e3=time.time()
+                e[2]+=(time.time()-s)
                 self.word_length(tok)
-                # e4=time.time()
+                e[3]+=(time.time()-s)
                 self.is_number(tok)
-                # e5=time.time()
+                e[4]+=(time.time()-s)
                 self.ends_with_period(tok)
-                # e6=time.time()
+                e[5]+=(time.time()-s)
                 self.enclosed_brackets(tok)
-                # e7=time.time()
+                e[6]+=(time.time()-s)
                 self.has_hyphen(tok)
-                # e8=time.time()
+                e[7]+=(time.time()-s)
                 self.has_colon(tok)
-                # e9=time.time()
+                e[8]+=(time.time()-s)
                 self.is_etal(tok)
-                # e10=time.time()
+                e[9]+=(time.time()-s)
                 self.is_valid_year(tok)
-                # e11=time.time()
+                e[10]+=(time.time()-s)
                 self.is_special_token(tok)
-                # e12=time.time()
+                e[11]+=(time.time()-s)
                 self.has_period_period(tok)
-                # e13=time.time()
+                e[12]+=(time.time()-s)
                 self.has_period_comma(tok)
-                # e14=time.time()
+                e[13]+=(time.time()-s)
                 self.is_url(tok)
-                # e15=time.time()
+                e[14]+=(time.time()-s)
                 self.is_email(tok)
-                # e16=time.time()
+                e[15]+=(time.time()-s)
                 self.first_name_lexicon(tok)
-                # e17=time.time()
+                e[16]+=(time.time()-s)
                 self.last_name_lexicon(tok)
-                # e18=time.time()
-                self.journal_lexicon(tok)
-                # e19=time.time()
+                e[17]+=(time.time()-s)
+                if self.features[tok][18]==False:
+                    self.journal_lexicon(tok)
+                e[18]+=(time.time()-s)
                 self.is_bio_term(tok)
-                # e20=time.time()
-                #print (e1-s),(e2-s),(e3-s),(e4-s),(e5-s),(e6-s),(e7-s),(e8-s),(e9-s),(e10-s),(e11-s),(e12-s),(e13-s),(e14-s),(e15-s),(e16-s),(e17-s),(e18-s),(e19-s),(e20-s),
-                #print
-                #print
+                e[19]+=(time.time()-s)
+                # print (e1-s),(e2-s),(e3-s),(e4-s),(e5-s),(e6-s),(e7-s),(e8-s),(e9-s),(e10-s),(e11-s),(e12-s),(e13-s),(e14-s),(e15-s),(e16-s),(e17-s),(e18-s),(e19-s),(e20-s),
+                # print
+                # print
+        #print e
         return self.features
 
     def vectorize(self):
-        #fDict = self.get_features()
-
-
         v = np.array(self.features)
 
         return v
