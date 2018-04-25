@@ -22,26 +22,29 @@ with open('../../data/umass_test.pickle', 'rb') as inp:
     X_test = pickle.load(inp)
     y_test = pickle.load(inp)
 
+print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
+
 #loading bobtex data
-for style in styleFile:
-    with open('../../data/'+style+'_train.pkl', 'rb') as inp:
-        bibtex_X_train = pickle.load(inp)
-        bibtex_y_train = pickle.load(inp)
-
-    with open('../../data/'+style+'_val.pkl', 'rb') as inp:
-        bibtex_X_valid = pickle.load(inp)
-        bibtex_y_valid = pickle.load(inp)
-
-    with open('../../data/'+style+'_test.pickle', 'rb') as inp:
-        bibtex_X_test = pickle.load(inp)
-        bibtex_y_test = pickle.load(inp)
-
-    X_train = np.concatenate((X_train,bibtex_X_train),axis = 0)
-    y_train = np.concatenate((y_train,bibtex_y_train),axis = 0)
-    X_valid = np.concatenate((X_valid,bibtex_X_valid),axis = 0)
-    y_valid = np.concatenate((y_valid,bibtex_y_valid),axis = 0)
-    X_test = np.concatenate((X_test,bibtex_X_test),axis = 0)
-    y_test = np.concatenate((y_test,bibtex_y_test),axis = 0)
+# for style in styleFile:
+#     with open('../../data/'+style+'_train.pkl', 'rb') as inp:
+#         bibtex_X_train = pickle.load(inp)
+#         bibtex_y_train = pickle.load(inp)
+#
+#     with open('../../data/'+style+'_val.pkl', 'rb') as inp:
+#         bibtex_X_valid = pickle.load(inp)
+#         bibtex_y_valid = pickle.load(inp)
+#
+#     with open('../../data/'+style+'_test.pickle', 'rb') as inp:
+#         bibtex_X_test = pickle.load(inp)
+#         bibtex_y_test = pickle.load(inp)
+#
+#     X_train = np.concatenate((X_train,bibtex_X_train),axis = 0)
+#     y_train = np.concatenate((y_train,bibtex_y_train),axis = 0)
+#     X_valid = np.concatenate((X_valid,bibtex_X_valid),axis = 0)
+#     y_valid = np.concatenate((y_valid,bibtex_y_valid),axis = 0)
+#     X_test = np.concatenate((X_test,bibtex_X_test),axis = 0)
+#     y_test = np.concatenate((y_test,bibtex_y_test),axis = 0)
+# print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
 
 #data_train = BatchGenerator(X_train, y_train, shuffle=False)
 # data_valid = BatchGenerator(X_valid, y_valid, shuffle=False)
@@ -129,9 +132,15 @@ def test_epoch(data_x,data_y):
     ground_truth = np.argmax(data_y, axis = 2)
     ground_truth = np.reshape(ground_truth,(1,-1))
     ground_truth = np.squeeze(ground_truth)
+    print "pred:",pred,"ground:",ground_truth
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
     print(classification_report(ground_truth,pred,target_names=target_names))
+    # print(classification_report(
+    #     ground_truth,pred,labels=ALL_TAGS,digits=2
+    # ))
+
+    #labels=['title','volume','year','journal','person','pages']
 
     return _accs, _costs, _scores
 
@@ -174,9 +183,4 @@ for epoch in xrange(epochs):
 print '**TEST RESULT:'
 test_acc, test_cost,test_score = test_epoch(X_test,y_test)
 print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost, test_score)
-
-
-print '**DEV RESULT:'
-val_acc, val_cost, val_score= test_epoch(X_valid,y_valid)
-print '**Test %d, acc=%g, cost=%g, F1 score=%g' % (y_valid.shape[0], val_acc, val_cost, val_score)
 
