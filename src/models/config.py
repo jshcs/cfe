@@ -24,9 +24,9 @@ config_params={
 "is_bio_term" #19
 ],
 #Training params
-"epochs":120,
-"lrate":6e-4,
-"lrate_decay":0.7,
+"epochs":100,
+"lrate":8e-3,
+"lrate_decay":0.8,
 "do_bnorm":True,
 "do_dropout":True,
 "max_stream_length":110,
@@ -61,8 +61,8 @@ BIO_TITLES="../../data/bio_titles.txt"
 
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
-#styleFile = #['biochem','bmc-mathphys','achemso','ajhg',['mit-chicago','natbib','siamplain','spbasic']
-styleFile = ['mit-chicago','natbib','siamplain','spbasic']
+styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
+#styleFile = ['mit-chicago','natbib','siamplain','spbasic']
 PUNCT=[".",",",";",":"]
 
 labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
