@@ -30,6 +30,7 @@ def read_dataset(data_type):
     c=0
     max_length=config_params["max_stream_length"]
     n_features=len(config_params["feature_names"])+EMD_SIZE-1
+    print 'n_features',n_features
 
     data_feature=np.zeros((1,max_length,n_features))
     print data_feature.shape
@@ -41,12 +42,8 @@ def read_dataset(data_type):
         tokensStr = Data[s][0]
         labelsStr = Data[s][1]
         len_string=len(tokensStr)
-        if len(tokensStr)<config_params["max_stream_length"]:
-            diff=config_params["max_stream_length"]-len(tokensStr)
-            tokensStr+=['<UNK>']*(diff)
-            labelsStr+=[len(labels)]*diff
 
-        elif len(tokensStr)>=config_params["max_stream_length"]:
+        if len(tokensStr)>=config_params["max_stream_length"]:
             tokensStr=tokensStr[:config_params["max_stream_length"]]
             labelsStr=labelsStr[:config_params["max_stream_length"]]
         #print tokensStr
@@ -55,26 +52,37 @@ def read_dataset(data_type):
         # print
 
         vectorized_features=features_sentence.get_features()
-        print len(vectorized_features),len(vectorized_features[0])
+        #print len(vectorized_features),len(vectorized_features[0])
         vectorized_features=np.array(vectorized_features)
-        print vectorized_features.shape
-        data_feature=np.append(data_feature,vectorized_features,axis=0)
+        #print vectorized_features.shape
+        if len(tokensStr)<config_params["max_stream_length"]:
+            diff=config_params["max_stream_length"]-len(tokensStr)
+            extra_features = np.ones((diff,n_features))
+            vectorized_features = np.concatenate((vectorized_features, extra_features), axis=0)
+            labelsStr+=[len(labels)]*diff
+        vectorized_features = np.expand_dims(vectorized_features, axis=0)
+        data_feature=np.concatenate((data_feature,vectorized_features),axis=0)
 
         # print vectorized_features.
         #print len(vectorized_features),len(vectorized_features[0]),type(vectorized_features)
         labelsStr=np.array(labelsStr)
         onehot_labels=np.eye(len(labels)+1)[labelsStr]
         #data_feature.append(vectorized_features)
-        print data_feature.shape
+        #print 'data_feature.shape',data_feature.shape
         data_target.append(onehot_labels)
         end_time=time.time()
         total_time+=(end_time-start)
-        print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
+        #print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
     return data_feature[1:,:,:],np.array(data_target)
 
 def read_bibtex_dataset(Data):
     c=0
-    data_feature=[]
+    max_length=config_params["max_stream_length"]
+    n_features=len(config_params["feature_names"])+EMD_SIZE-1
+    print 'n_features',n_features
+
+    data_feature=np.zeros((1,max_length,n_features))
+    print data_feature.shape
     data_target=[]
     total_time=0
     for s in Data:
@@ -83,32 +91,35 @@ def read_bibtex_dataset(Data):
         tokensStr = Data[s][0]
         labelsStr = Data[s][1]
         len_string=len(tokensStr)
-        if len(tokensStr)<config_params["max_stream_length"]:
-            diff=config_params["max_stream_length"]-len(tokensStr)
-            tokensStr+=['<UNK>']*(diff)
-            labelsStr+=[len(labels)]*diff
 
-        elif len(tokensStr)>config_params["max_stream_length"]:
+        if len(tokensStr)>=config_params["max_stream_length"]:
             tokensStr=tokensStr[:config_params["max_stream_length"]]
             labelsStr=labelsStr[:config_params["max_stream_length"]]
-        #print tokensStr
-        features_sentence=Features(tokensStr,sorted_fname,sorted_lname,bio_dict,sorted_journals_db)
-        # print s
-        # print
+        features_sentence=Features(tokensStr,sorted_fname,sorted_lname,bio_dict,sorted_journals_db,WV)
 
         vectorized_features=features_sentence.get_features()
-        # print vectorized_features
+
+        vectorized_features=np.array(vectorized_features)
+
+        if len(tokensStr)<config_params["max_stream_length"]:
+            diff=config_params["max_stream_length"]-len(tokensStr)
+            extra_features = np.ones((diff,n_features))
+            vectorized_features = np.concatenate((vectorized_features, extra_features), axis=0)
+            labelsStr+=[len(labels)]*diff
+        vectorized_features = np.expand_dims(vectorized_features, axis=0)
+        data_feature=np.concatenate((data_feature,vectorized_features),axis=0)
+
         labelsStr=np.array(labelsStr)
         onehot_labels=np.eye(len(labels)+1)[labelsStr]
-        data_feature.append(vectorized_features)
+
         data_target.append(onehot_labels)
         end_time=time.time()
         total_time+=(end_time-start)
-        print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
-    return np.array(data_feature),np.array(data_target)
+    return data_feature[1:,:,:],np.array(data_target)
 
 # s=time.time()
-# r=read_dataset("train")
+f,t=read_dataset("test")
+print type(f),f.shape
 # e=time.time()
 #
 # print r[0],r[1]
