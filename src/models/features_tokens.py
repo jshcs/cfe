@@ -8,19 +8,20 @@ import simstring
 
 
 class Features():
-    def __init__(self,sentence,fname_list,lname_list,vocab_bioterms,sorted_journals_db):
+    def __init__(self,sentence,fname_list,lname_list,vocab_bioterms,sorted_journals_db,WV):
         #self.token=token
         #self.jnames_vocab=vocab_journals
         self.bioterms_vocab=vocab_bioterms
         #len_sorted_journals=len(sorted_journals)
         self.db=sorted_journals_db
+        self.WV=WV
         #self.sorted_journals_2=sorted_journals[len_sorted_journals/2:]
         #self.sorted_journals_3=sorted_journals[2*len_sorted_journals/3:]
         #self.features={k:False for k in config_params['feature_names']}
         self.features=[]
         self.sentence=sentence
         for tok in self.sentence:
-            self.features.append([False for i in range(len(config_params['feature_names']))])
+            self.features.append([False for i in range(len(config_params['feature_names'])+EMD_SIZE)])
         self.fname_list=fname_list
         self.lname_list=lname_list
         #self.times=[]
@@ -224,6 +225,14 @@ class Features():
     def is_bio_term(self,token): #19
         self.features[token][19]=self.sentence[token].lower() in self.bioterms_vocab
 
+    def word_embeddings(self,token): #20
+        try:
+            self.features[token][20:]=self.WV[self.sentence[token]].tolist()
+        except:
+            #print "No match",self.sentence[token]
+            self.features[token][20:]=[0]*EMD_SIZE
+
+
 
     def get_features(self):
         e=[0 for i in range(len(config_params["feature_names"]))]
@@ -275,6 +284,8 @@ class Features():
                 e[18]+=(time.time()-s)
                 self.is_bio_term(tok)
                 e[19]+=(time.time()-s)
+                self.word_embeddings(tok)
+                e[20]+=(time.time()-s)
                 # print (e1-s),(e2-s),(e3-s),(e4-s),(e5-s),(e6-s),(e7-s),(e8-s),(e9-s),(e10-s),(e11-s),(e12-s),(e13-s),(e14-s),(e15-s),(e16-s),(e17-s),(e18-s),(e19-s),(e20-s),
                 # print
                 # print

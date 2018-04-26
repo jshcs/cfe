@@ -21,7 +21,8 @@ config_params={
 "first_name_lexicon", #16
 "last_name_lexicon", #17
 "journal_name_lexicon", #18
-"is_bio_term" #19
+"is_bio_term", #19
+"word_embeddings" #20
 ],
 #Training params
 "epochs":100,
@@ -59,6 +60,11 @@ RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
 BIO_TITLES="../../data/bio_titles.txt"
 
+
+WE_BIN="../../data/PMC-w2v.bin"
+WE_TXT="../../data/PMC-w2v.txt"
+WE_PKL="../../data/PMC-w2v.pickle"
+
 ALL_TAGS=['person','title','year','journal','volume','pages']
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
@@ -75,3 +81,5 @@ MAX_WINDOW=5
 
 SS_METRIC=simstring.jaccard
 SS_THRESHOLD=0.4
+
+EMD_SIZE=200

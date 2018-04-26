@@ -6,7 +6,6 @@ from tensorflow.contrib import rnn
 import pickle
 from config import *
 from umass_parser import *
-from features import *
 from readDataset import *
 
 #loading umaass data
@@ -56,7 +55,7 @@ print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_tes
 lrate = config_params["lrate"]
 num_units = config_params["num_units"]
 length = config_params["max_stream_length"]
-num_features = len(config_params["feature_names"])
+num_features = len(config_params["feature_names"])+EMD_SIZE-1
 num_classes = len(labels)+1
 epochs = config_params["epochs"]
 tr_batch_size = config_params["batch_size"]
