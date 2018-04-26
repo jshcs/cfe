@@ -9,19 +9,19 @@ from umass_parser import *
 from readDataset import *
 
 #loading umaass data
-with open('../../data/umass_train.pkl', 'rb') as inp:
-    X_train = pickle.load(inp)
-    y_train = pickle.load(inp)
-
-with open('../../data/umass_val.pkl', 'rb') as inp:
-    X_valid = pickle.load(inp)
-    y_valid = pickle.load(inp)
-
-with open('../../data/umass_test.pickle', 'rb') as inp:
-    X_test = pickle.load(inp)
-    y_test = pickle.load(inp)
-
-print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
+# with open('../../data/umass_train.pkl', 'rb') as inp:
+#     X_train = pickle.load(inp)
+#     y_train = pickle.load(inp)
+#
+# with open('../../data/umass_val.pkl', 'rb') as inp:
+#     X_valid = pickle.load(inp)
+#     y_valid = pickle.load(inp)
+#
+# with open('../../data/umass_test.pickle', 'rb') as inp:
+#     X_test = pickle.load(inp)
+#     y_test = pickle.load(inp)
+#
+# print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
 
 #loading bobtex data
 # for style in styleFile:
@@ -50,6 +50,15 @@ print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_tes
 # data_test = BatchGenerator(X_test, y_test, shuffle=False)
 
 #print data_train
+
+X_train=np.load('../../data/we_npy/combined_X_train.npy')
+y_train=np.load('../../data/we_npy/combined_y_train.npy')
+X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
+y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
+X_test=np.load('../../data/we_npy/combined_X_test.npy')
+y_test=np.load('../../data/we_npy/combined_y_test.npy')
+
+print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
 
 
 lrate = config_params["lrate"]
