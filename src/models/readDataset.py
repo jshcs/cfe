@@ -30,7 +30,7 @@ def read_dataset(data_type):
     c=0
     max_length=config_params["max_stream_length"]
     n_features=len(config_params["feature_names"])+EMD_SIZE-1
-    print 'n_features',n_features
+    #print 'n_features',n_features
 
     data_feature=np.zeros((1,max_length,n_features))
     print data_feature.shape
@@ -57,10 +57,11 @@ def read_dataset(data_type):
         #print vectorized_features.shape
         if len(tokensStr)<config_params["max_stream_length"]:
             diff=config_params["max_stream_length"]-len(tokensStr)
-            extra_features = np.ones((diff,n_features))
+            extra_features = np.zeros((diff,n_features))
             vectorized_features = np.concatenate((vectorized_features, extra_features), axis=0)
             labelsStr+=[len(labels)]*diff
         vectorized_features = np.expand_dims(vectorized_features, axis=0)
+        # print vectorized_features
         data_feature=np.concatenate((data_feature,vectorized_features),axis=0)
 
         # print vectorized_features.
@@ -72,14 +73,14 @@ def read_dataset(data_type):
         data_target.append(onehot_labels)
         end_time=time.time()
         total_time+=(end_time-start)
-        #print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
+        print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
     return data_feature[1:,:,:],np.array(data_target)
 
 def read_bibtex_dataset(Data):
     c=0
     max_length=config_params["max_stream_length"]
     n_features=len(config_params["feature_names"])+EMD_SIZE-1
-    print 'n_features',n_features
+    #print 'n_features',n_features
 
     data_feature=np.zeros((1,max_length,n_features))
     print data_feature.shape
@@ -103,7 +104,7 @@ def read_bibtex_dataset(Data):
 
         if len(tokensStr)<config_params["max_stream_length"]:
             diff=config_params["max_stream_length"]-len(tokensStr)
-            extra_features = np.ones((diff,n_features))
+            extra_features = np.zeros((diff,n_features))
             vectorized_features = np.concatenate((vectorized_features, extra_features), axis=0)
             labelsStr+=[len(labels)]*diff
         vectorized_features = np.expand_dims(vectorized_features, axis=0)
@@ -115,11 +116,12 @@ def read_bibtex_dataset(Data):
         data_target.append(onehot_labels)
         end_time=time.time()
         total_time+=(end_time-start)
+        print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string
     return data_feature[1:,:,:],np.array(data_target)
 
 # s=time.time()
-f,t=read_dataset("test")
-print type(f),f.shape
+# f,t=read_dataset("test")
+# print type(f),f.shape
 # e=time.time()
 #
 # print r[0],r[1]
