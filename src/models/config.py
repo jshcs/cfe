@@ -1,5 +1,5 @@
 #Features
-import simstring
+##import simstring
 config_params={
 "feature_names":[
 "is_all_caps", #0
@@ -25,14 +25,14 @@ config_params={
 "word_embeddings" #20
 ],
 #Training params
-"epochs":100,
-"lrate":8e-3,
-"lrate_decay":0.8,
+"epochs":120,
+"lrate":6e-4,
+"lrate_decay":0.7,
 "do_bnorm":True,
 "do_dropout":True,
 "max_stream_length":110,
 "num_units":128,
-"batch_size":20,
+"batch_size":100,
 "num_layer":1,
 "filter_width":3,
 "repeat_times":4
@@ -65,7 +65,7 @@ WE_BIN="../../data/PMC-w2v.bin"
 WE_TXT="../../data/PMC-w2v.txt"
 WE_PKL="../../data/PMC-w2v.pickle"
 
-ALL_TAGS=['person','title','year','journal','volume','pages']
+ALL_TAGS=['person','title','journal','year','volume','pages']
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
 #styleFile = ['mit-chicago','natbib','siamplain','spbasic']
@@ -79,7 +79,7 @@ SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
 
 MAX_WINDOW=5
 
-SS_METRIC=simstring.jaccard
-SS_THRESHOLD=0.4
+##SS_METRIC=simstring.jaccard
+##SS_THRESHOLD=0.4
 
 EMD_SIZE=200
