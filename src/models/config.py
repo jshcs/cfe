@@ -1,5 +1,6 @@
 #Features
 import simstring
+import numpy as np
 config_params={
 "feature_names":[
 "is_all_caps", #0
@@ -25,14 +26,14 @@ config_params={
 "word_embeddings" #20
 ],
 #Training params
-"epochs":100,
-"lrate":8e-3,
+"epochs":50,
+"lrate":1e-4,
 "lrate_decay":0.8,
 "do_bnorm":True,
 "do_dropout":True,
 "max_stream_length":110,
 "num_units":128,
-"batch_size":20,
+"batch_size":100,
 "num_layer":1,
 "filter_width":3,
 "repeat_times":4
@@ -65,7 +66,7 @@ WE_BIN="../../data/PMC-w2v.bin"
 WE_TXT="../../data/PMC-w2v.txt"
 WE_PKL="../../data/PMC-w2v.pickle"
 
-ALL_TAGS=['person','title','year','journal','volume','pages']
+ALL_TAGS=['person','title','journal','year','volume','pages']
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
 #styleFile = ['mit-chicago','natbib','siamplain','spbasic']
@@ -83,3 +84,6 @@ SS_METRIC=simstring.jaccard
 SS_THRESHOLD=0.4
 
 EMD_SIZE=200
+
+LR_RANGE=[i for i in np.arange(1e-4,5e-3,2e-4)]
+DECAY_RATE=[i for i in np.arange(0.8,0.95,0.05)]
