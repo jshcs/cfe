@@ -17,55 +17,71 @@ def main():
     batch_size = config_params["batch_size"]
 
     # reading umass data
-    # train_token,train_label = read_dataset("train")
-    # val_token,val_label = read_dataset("dev")
-    # test_token,test_label = read_dataset("test")
+    X_train,y_train = read_dataset("train")
+    X_valid,y_valid = read_dataset("dev")
+    X_test,y_test= read_dataset("test")
 
-    print 'writing'
+    # print 'writing'
     # print 'train'
     # print train_token.shape,train_label.shape
-    # with open('../../data/umass_train.pkl', 'wb') as outp:
+    # with open('../../data/we_pickles/umass_train.pkl', 'wb') as outp:
     #     pickle.dump(train_token, outp)
     #     pickle.dump(train_label, outp)
     #
     # print 'val'
     # print val_token.shape,val_label.shape
-    # with open('../../data/umass_val.pkl', 'wb') as outp:
+    # with open('../../data/we_pickles/umass_val.pkl', 'wb') as outp:
     #     pickle.dump(val_token, outp)
     #     pickle.dump(val_label, outp)
     #
     # print 'test'
     # print test_token.shape,test_label.shape
-    # with open('../../data/umass_test.pickle', 'wb') as outp:
+    # with open('../../data/we_pickles/umass_test.pickle', 'wb') as outp:
     #     pickle.dump(np.array(test_token), outp)
     #     pickle.dump(np.array(test_label), outp)
-    #
-    # # reading bibtex data
+
+    # reading bibtex data
 
     for style in styleFile:
         trainDict,valDict,testDict = dict_of_style(style)
-        train_token,train_label = read_bibtex_dataset(trainDict)
-        val_token,val_label = read_bibtex_dataset(valDict)
-        test_token,test_label = read_bibtex_dataset(testDict)
+        bibtex_X_train,bibtex_y_train = read_bibtex_dataset(trainDict)
+        bibtex_X_valid,bibtex_y_valid = read_bibtex_dataset(valDict)
+        bibtex_X_test,bibtex_y_test = read_bibtex_dataset(testDict)
 
-        print 'writing'
-        print 'train'
-        print train_token.shape,train_label.shape
-        with open('../../data/'+style+'_train.pkl', 'wb') as outp:
-            pickle.dump(train_token, outp)
-            pickle.dump(train_label, outp)
+        # print 'writing'
+        # print 'train'
+        # print train_token.shape,train_label.shape
+        # with open('../../data/we_pickles/'+style+'_train.pkl', 'wb') as outp:
+        #     pickle.dump(train_token, outp)
+        #     pickle.dump(train_label, outp)
+        #
+        # print 'val'
+        # print val_token.shape,val_label.shape
+        # with open('../../data/we_pickles/'+style+'_val.pkl', 'wb') as outp:
+        #     pickle.dump(val_token, outp)
+        #     pickle.dump(val_label, outp)
+        #
+        # print 'test'
+        # print test_token.shape,test_label.shape
+        # with open('../../data/we_pickles/'+style+'_test.pickle', 'wb') as outp:
+        #     pickle.dump(np.array(test_token), outp)
+        #     pickle.dump(np.array(test_label), outp)
 
-        print 'val'
-        print val_token.shape,val_label.shape
-        with open('../../data/'+style+'_val.pkl', 'wb') as outp:
-            pickle.dump(val_token, outp)
-            pickle.dump(val_label, outp)
+        X_train=np.concatenate((X_train,bibtex_X_train),axis=0)
+        y_train=np.concatenate((y_train,bibtex_y_train),axis=0)
+        X_valid=np.concatenate((X_valid,bibtex_X_valid),axis=0)
+        y_valid=np.concatenate((y_valid,bibtex_y_valid),axis=0)
+        X_test=np.concatenate((X_test,bibtex_X_test),axis=0)
+        y_test=np.concatenate((y_test,bibtex_y_test),axis=0)
 
-        print 'test'
-        print test_token.shape,test_label.shape
-        with open('../../data/'+style+'_test.pickle', 'wb') as outp:
-            pickle.dump(np.array(test_token), outp)
-            pickle.dump(np.array(test_label), outp)
+    np.save('../../data/we_npy/combined_X_train.npy',X_train,allow_pickle=False)
+    np.save('../../data/we_npy/combined_y_train.npy',y_train,allow_pickle=False)
+    np.save('../../data/we_npy/combined_X_valid.npy',X_valid,allow_pickle=False)
+    np.save('../../data/we_npy/combined_y_valid.npy',y_valid,allow_pickle=False)
+    np.save('../../data/we_npy/combined_X_test.npy',X_test,allow_pickle=False)
+    np.save('../../data/we_npy/combined_y_test.npy',y_test,allow_pickle=False)
+
+    print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
 
 if __name__ == '__main__':
     main()

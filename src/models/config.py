@@ -1,5 +1,8 @@
 #Features
 import simstring
+import numpy as np
+##import simstring
+
 config_params={
 "feature_names":[
 "is_all_caps", #0
@@ -21,17 +24,18 @@ config_params={
 "first_name_lexicon", #16
 "last_name_lexicon", #17
 "journal_name_lexicon", #18
-"is_bio_term" #19
+"is_bio_term", #19
+"word_embeddings" #20
 ],
 #Training params
-"epochs":120,
-"lrate":6e-4,
-"lrate_decay":0.7,
+"epochs":50,
+"lrate":1e-4,
+"lrate_decay":0.8,
 "do_bnorm":True,
 "do_dropout":True,
 "max_stream_length":110,
 "num_units":128,
-"batch_size":20,
+"batch_size":100,
 "num_layer":1,
 "filter_width":3,
 "repeat_times":4
@@ -59,10 +63,15 @@ RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
 BIO_TITLES="../../data/bio_titles.txt"
 
-ALL_TAGS=['person','title','year','journal','volume','pages']
 
-#styleFile = #['biochem','bmc-mathphys','achemso','ajhg',['mit-chicago','natbib','siamplain','spbasic']
-styleFile = ['mit-chicago','natbib','siamplain','spbasic']
+WE_BIN="../../data/PMC-w2v.bin"
+WE_TXT="../../data/PMC-w2v.txt"
+WE_PKL="../../data/PMC-w2v.pickle"
+
+ALL_TAGS=['person','title','journal','year','volume','pages']
+
+styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
+#styleFile = ['mit-chicago','natbib','siamplain','spbasic']
 PUNCT=[".",",",";",":"]
 
 labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
@@ -73,5 +82,10 @@ SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
 
 MAX_WINDOW=5
 
-SS_METRIC=simstring.jaccard
-SS_THRESHOLD=0.4
+##SS_METRIC=simstring.jaccard
+##SS_THRESHOLD=0.4
+
+EMD_SIZE=200
+
+LR_RANGE=[i for i in np.arange(1e-4,5e-3,2e-4)]
+DECAY_RATE=[i for i in np.arange(0.8,0.95,0.05)]
