@@ -1,27 +1,71 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.layers.python.layers import initializers
-from cnn_config import *
+from config import *
 import pickle
 from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import pandas as pd
+import matplotlib.pyplot as plt
 
-#loading data
-with open('../../data/train.pkl', 'rb') as inp:
-    X_train = pickle.load(inp)
-    y_train = pickle.load(inp)
+#loading umaass data
+##with open('../../data/umass_train.pkl', 'rb') as inp:
+##    X_train = pickle.load(inp)
+##    y_train = pickle.load(inp)
+##
+##with open('../../data/umass_val.pkl', 'rb') as inp:
+##    X_valid = pickle.load(inp)
+##    y_valid = pickle.load(inp)
+##
+##with open('../../data/umass_test.pickle', 'rb') as inp:
+##    X_test = pickle.load(inp)
+##    y_test = pickle.load(inp)
+##
+##print 'finish reading umass data'
+##
+###loading bobtex data
+##for style in styleFile:
+##    with open('../../data/'+style+'_train.pkl', 'rb') as inp:
+##        bibtex_X_train = pickle.load(inp)
+##        bibtex_y_train = pickle.load(inp)
+##
+##    with open('../../data/'+style+'_val.pkl', 'rb') as inp:
+##        bibtex_X_valid = pickle.load(inp)
+##        bibtex_y_valid = pickle.load(inp)
+##
+##    with open('../../data/'+style+'_test.pickle', 'rb') as inp:
+##        bibtex_X_test = pickle.load(inp)
+##        bibtex_y_test = pickle.load(inp)
+##
+##    X_train = np.concatenate((X_train,bibtex_X_train),axis = 0)
+##    y_train = np.concatenate((y_train,bibtex_y_train),axis = 0)
+##    X_valid = np.concatenate((X_valid,bibtex_X_valid),axis = 0)
+##    y_valid = np.concatenate((y_valid,bibtex_y_valid),axis = 0)
+##    X_test = np.concatenate((X_test,bibtex_X_test),axis = 0)
+##    y_test = np.concatenate((y_test,bibtex_y_test),axis = 0)
+##
+##    print 'finish reading '+style+' data'
+##    print 'train data number',y_train.shape[0],style,bibtex_y_train.shape[0]
+##    print 'valid data number',y_valid.shape[0],style,bibtex_y_valid.shape[0]
+##    print 'test data number',y_test.shape[0],style,bibtex_y_test.shape[0]
 
-with open('../../data/val.pkl', 'rb') as inp:
-    X_valid = pickle.load(inp)
-    y_valid = pickle.load(inp)
+X_train=np.load('../../data/we_npy/combined_X_train.npy')
+y_train=np.load('../../data/we_npy/combined_y_train.npy')
+X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
+y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
+X_test=np.load('../../data/we_npy/combined_X_test.npy')
+y_test=np.load('../../data/we_npy/combined_y_test.npy')
 
-with open('../../data/test.pickle', 'rb') as inp:
-    X_test = pickle.load(inp)
-    y_test = pickle.load(inp)
+print 'input size'
+print X_train.shape,X_valid.shape,X_test.shape
+print 'label size'
+print y_train.shape,y_valid.shape,y_test.shape
 
 lrate = config_params["lrate"]
 length = config_params["max_stream_length"]
-num_features = len(config_params["feature_names"])
+num_features = len(config_params["feature_names"])+EMD_SIZE-1
 num_classes = len(labels)+1
 epochs = config_params["epochs"]
 batch_size = config_params["batch_size"]
@@ -32,7 +76,7 @@ filter_width = config_params["filter_width"]
 repeat_times = config_params["repeat_times"]
 max_grad_norm = 5.0
 target_names = ALL_TAGS
-target_names.append('unknown')
+##target_names.append('unknown')
 
 lr = tf.placeholder(tf.float32, [])
 dropout = tf.placeholder(tf.float32, [])
@@ -57,14 +101,15 @@ def idcnn(tokens):
     if dropout == 1.0:
         reuse = True
     with tf.variable_scope("idcnn"):
-        filter_weights = tf.get_variable("idcnn_filter",
-                shape=[1, filter_width, num_features,num_filter],
-                initializer=initializers.xavier_initializer())
+        with tf.device("/gpu:0"):
+            filter_weights = tf.get_variable("idcnn_filter",
+                    shape=[1, filter_width, num_features,num_filter],
+                    initializer=initializers.xavier_initializer())
 
-        layerInput = tf.nn.conv2d(inputs,filter_weights,
-                                  strides=[1, 1, 1, 1],
-                                  padding="SAME",
-                                  name="init_layer")
+            layerInput = tf.nn.conv2d(inputs,filter_weights,
+                                      strides=[1, 1, 1, 1],
+                                      padding="SAME",
+                                      name="init_layer")
         finalOutFromLayers = []
         totalWidthForLastDim = 0
         for j in range(repeat_times):
@@ -74,19 +119,19 @@ def idcnn(tokens):
                     isLast = True 
                 else:
                     isLast = False
-
-                with tf.variable_scope("atrous-conv-layer-%d" % i,
-                                       reuse=True
-                                       if (reuse or j > 0) else False):
-                    w = tf.get_variable("filterW",
-                                        shape=[1, filter_width, num_filter,
-                                               num_filter],
-                                        initializer=tf.contrib.layers.xavier_initializer())
-                    b = tf.get_variable("filterB", shape=[num_filter])
-                    conv = tf.nn.atrous_conv2d(layerInput,w,rate=dilation,
-                                               padding="SAME")
-                    conv = tf.nn.bias_add(conv, b)
-                    conv = tf.nn.relu(conv)
+                with tf.device("/gpu:0"):
+                    with tf.variable_scope("atrous-conv-layer-%d" % i,
+                                           reuse=True
+                                           if (reuse or j > 0) else False):
+                        w = tf.get_variable("filterW",
+                                            shape=[1, filter_width, num_filter,
+                                                   num_filter],
+                                            initializer=tf.contrib.layers.xavier_initializer())
+                        b = tf.get_variable("filterB", shape=[num_filter])
+                        conv = tf.nn.atrous_conv2d(layerInput,w,rate=dilation,
+                                                   padding="SAME")
+                        conv = tf.nn.bias_add(conv, b)
+                        conv = tf.nn.relu(conv)
                     if isLast:
                         finalOutFromLayers.append(conv)
                         totalWidthForLastDim += num_filter
@@ -99,14 +144,15 @@ def idcnn(tokens):
         finalOut = tf.reshape(finalOut, [-1, totalWidthForLastDim])
         cnn_output_width = totalWidthForLastDim
 
-    with tf.variable_scope("logits"):
-        W = tf.get_variable("W", shape=[cnn_output_width,num_classes],
-                            dtype=tf.float32, initializer=initializers.xavier_initializer())
-        b = tf.get_variable("b",  initializer=tf.constant(0.001, shape=[num_classes]))
+    with tf.device("/gpu:0"):
+        with tf.variable_scope("logits"):
+            W = tf.get_variable("W", shape=[cnn_output_width,num_classes],
+                                dtype=tf.float32, initializer=initializers.xavier_initializer())
+            b = tf.get_variable("b",  initializer=tf.constant(0.001, shape=[num_classes]))
 
-        pred = tf.nn.xw_plus_b(finalOut, W, b)
+            pred = tf.nn.xw_plus_b(finalOut, W, b)
 
-        preds = tf.reshape(pred, [-1, length, num_classes])
+            preds = tf.reshape(pred, [-1, length, num_classes])
 
     return preds
 
@@ -129,10 +175,14 @@ optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 train_op = optimizer.apply_gradients(zip(grads, tvars),global_step=tf.contrib.framework.get_or_create_global_step())
 
 #test on other data set (valid or test)
-def testModule(data_x,data_y):
+##test_batch_size = 100
+def testModule(data_x,data_y,final):
+##    test_batch_num = data_x.shape[0]/test_batch_size
+##    if data_x.shape[0]%test_batch_size>0:
+##        test_batch_num = test_batch_num +1
+##    for n in range(test_batch_num):
     fetches = [accuracy, cost, idcnn_output]
     data_size = data_y.shape[0]
-    X_batch, y_batch = data_x,data_y
     feed_dict = {data:data_x, target:data_y, dropout:1.0}
     _accs, _costs, _pred = sess.run(fetches, feed_dict)
     #F1 result
@@ -145,11 +195,21 @@ def testModule(data_x,data_y):
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
     print(classification_report(ground_truth,pred,target_names=target_names))
+    if final==True:
+        cm=confusion_matrix(ground_truth,pred)
+        print 'cm shape',cm.shape
+        cm = cm[:len(labels),:len(labels)]
+        print 'cm shape',cm.shape
+        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
+                             columns = [i for i in target_names])
+        plt.figure()
+        sn.heatmap(df_cm,annot=True)
+        plt.savefig('idcnnResultExclude.png')
 
     return _accs, _costs, _scores
 
 #begin to train
-batch_size = 20
+batch_size = 50
 display_num = 10
 decay_num = 20
 tr_batch_num = y_train.shape[0]/batch_size
@@ -160,9 +220,9 @@ saver = tf.train.Saver(max_to_keep=100)
 valResult = []
 bestScore = 0.0
 
-for l in np.arange(lrate,lrate*2,15e-5):
+for l in np.arange(lrate,lrate+5e-4,15e-5):
     for d in np.arange(decay_rate,1.01,0.15):
-        with tf.Session() as sess:
+        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             sess.run(tf.global_variables_initializer())
             for i in range(epochs):
                 total_accs = 0.0
@@ -193,7 +253,7 @@ for l in np.arange(lrate,lrate*2,15e-5):
                     print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
                 if (i+1)>=100 and (i+1)%10==0:
                     print '**VAL RESULT:'
-                    val_acc, val_cost,val_score = testModule(X_valid,y_valid)
+                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
                     print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
                     valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
                     if bestScore<val_score:
@@ -207,14 +267,20 @@ for vRes in valResult:
     
 #check best model and apply on test model
 ##tf.reset_default_graph()
-with tf.Session() as sess:
-    #get best model
+with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+##    #get best model
     l = valResult[bestModel-1]['lr']
     dr = valResult[bestModel-1]['decay_rate']
     i = valResult[bestModel-1]['epoch']
-    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i))
+##    l = 0.00075
+##    dr = 1
+##    i = 120
+    print 'lrate:',l
+    print 'decay rate',dr
+    print 'epochs',i
+    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
     #evaluation the model on test set
-    test_acc, test_cost,test_score = testModule(X_test,y_test)
+    test_acc, test_cost,test_score = testModule(X_test,y_test,True)
     print '**TEST RESULT:'
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
 
