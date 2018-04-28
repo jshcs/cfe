@@ -7,11 +7,15 @@ import pickle
 from config import *
 #from umass_parser import *
 #from readDataset import *
-
+import matplotlib
+matplotlib.use('Agg')
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
+import itertools
+
+print "starting to gather data...."
 
 X_train=np.load('../../data/we_npy/combined_X_train.npy')
 y_train=np.load('../../data/we_npy/combined_y_train.npy')
@@ -36,16 +40,17 @@ max_grad_norm = 5.0
 target_names = ALL_TAGS
 target_names.append('unknown')
 
-with tf.device("/gpu:0"):
-    lr = tf.placeholder(tf.float32, [])
+
+with tf.device("/cpu:0"):
+    lr = tf.placeholder(tf.float32, []) 
     keep_prob = tf.placeholder(tf.float32, [])
     batch_size = tf.placeholder(tf.int32,[])
     wo = tf.Variable(tf.truncated_normal([num_units,num_classes]))
     bo = tf.Variable(tf.constant(0.1, shape=[num_classes]))
-    model_save_path = 'ckpt/lstm'
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
+    model_save_path='ckpt/lstm'
+
 #lstm cell
+
 def lstm_cell():
     cell = rnn.LSTMCell(num_units, reuse=tf.get_variable_scope().reuse)
     return rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
@@ -58,7 +63,7 @@ def lstm(tokens):
     return output
 
 #input placeholder
-with tf.device('"/gpu:0"'):
+with tf.device("/cpu:0"):
     with tf.variable_scope('Inputs'):
         data = tf.placeholder(tf.float32, shape=(None, length, num_features))
         target = tf.placeholder(tf.float32, shape=(None, length, num_classes))
@@ -68,26 +73,59 @@ with tf.device('"/gpu:0"'):
 lstm_output = lstm(data)
 
 #output of lstm network after last softmax layer
-with tf.device("/gpu:0"):
+with tf.device("/cpu:0"):
     with tf.variable_scope('outputs'):
         label_preds = tf.matmul(lstm_output, wo) + bo
-    ##	print lstm_output.get_shape,wo.get_shape
+        ##	print lstm_output.get_shape,wo.get_shape
         label_pred = tf.reshape(label_preds, [-1,length, num_classes])
 
-#check predict result against ground truth
-with tf.device("/gpu:0"):
-    correct_prediction = tf.equal(tf.argmax(label_pred, 2),tf.argmax(target,2))
-    #get accuracy
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    #cost function
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = target, logits = label_pred))
-    #grandient desent
-    tvars = tf.trainable_variables()
-    grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars), max_grad_norm)
-    optimizer = tf.train.AdamOptimizer(learning_rate=lr)
-    train_op = optimizer.apply_gradients(zip(grads, tvars),global_step=tf.contrib.framework.get_or_create_global_step())
 
+#check predict result against ground truth
+
+correct_prediction = tf.equal(tf.argmax(label_pred, 2),tf.argmax(target,2))
+#get accuracy
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+#cost function
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels = target, logits = label_pred))
+#grandient desent
+tvars = tf.trainable_variables()
+grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars), max_grad_norm)
+optimizer = tf.train.AdamOptimizer(learning_rate=lr)
+train_op = optimizer.apply_gradients(zip(grads, tvars),global_step=tf.train.get_or_create_global_step())
 #test on other data set (valid or test)
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='LSTM Confusion matrix',
+                          cmap=plt.cm.Reds):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+
 def test_epoch(data_x,data_y,final):
     fetches = [accuracy, cost, label_pred]
     data_size = data_y.shape[0]
@@ -111,15 +149,24 @@ def test_epoch(data_x,data_y,final):
 
     #labels=['title','volume','year','journal','person','pages']
     if final==True:
+        #np.set_printoptions(precision=2)
         cm=confusion_matrix(ground_truth,pred)
         print 'cm shape',cm.shape
+        # print 'cm shape',cm.shape
         cm=cm[:len(labels),:len(labels)]
         print 'cm shape',cm.shape
-        df_cm=pd.DataFrame(cm,index=[i for i in target_names],
-                           columns=[i for i in target_names])
+
         plt.figure()
-        sn.heatmap(df_cm,annot=True)
-        plt.savefig('lstm_cm.png')
+        plot_confusion_matrix(cm,classes=target_names[:-1],
+                              title='LSTM consusion matrix w/o normalization')
+        plt.savefig('lstm_cm_no_norm.png')
+
+        # Plot normalized confusion matrix
+        plt.figure()
+        plot_confusion_matrix(cm,classes=target_names[:-1],normalize=True,
+                              title='LSTM confusion matrix')
+
+        plt.savefig('lstm_cm_norm.png')
 
     return _accs, _costs, _scores
 
@@ -128,8 +175,12 @@ def get_random_batch(data_size,batch_size):
     return np.random.choice(data_size,batch_size)
 
 #begin to train
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
+
+print "*"*30
+print "Starting training...."
+#
+# #sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+# #sess.run(tf.global_variables_initializer())
 # tr_batch_size = 100
 display_num = 10
 decay_num = 20
@@ -140,6 +191,7 @@ max_f1=0
 bestModel=0
 for lrate in LR_RANGE:
     for decay_rate in DECAY_RATE:
+        sess=tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
         sess.run(tf.global_variables_initializer())
         for epoch in xrange(epochs):
             _costs = 0.0
@@ -156,14 +208,14 @@ for lrate in LR_RANGE:
             mean_acc = _accs / tr_batch_num
             mean_cost = _costs / tr_batch_num
             # if (epoch + 1) % display_num == 0:
-            #     save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
-            #     print 'the save path is ', save_path
-            # print 'epoch',epoch+1
-            # print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
-            # print '**VAL RESULT:'
-            # val_acc, val_cost,val_score = test_epoch(X_valid,y_valid)
-            # print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
-
+#             #     save_path = saver.save(sess, model_save_path, global_step=(epoch+1))
+#             #     print 'the save path is ', save_path
+#             # print 'epoch',epoch+1
+#             # print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_cost)
+#             # print '**VAL RESULT:'
+#             # val_acc, val_cost,val_score = test_epoch(X_valid,y_valid)
+#             # print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
+#
             if (epoch+1)%display_num==0:
                 print 'learning rate:',lrate,'decay_rate:',decay_rate
                 print 'epoch',epoch+1
@@ -179,26 +231,26 @@ for lrate in LR_RANGE:
                 #save model
                 save_path=saver.save(sess,model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lrate,decay_rate,epoch+1))
 
-# # testing
-# print '**TEST RESULT:'
-# test_acc, test_cost,test_score = test_epoch(X_test,y_test)
-# print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost, test_score)
-
-
-
+# # # testing
+# # print '**TEST RESULT:'
+# # test_acc, test_cost,test_score = test_epoch(X_test,y_test)
+# # print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost, test_score)
+#
+#
+#
 for vRes in all_results:
     print vRes
 
 #check best model and apply on test model
 ##tf.reset_default_graph()
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     ##    #get best model
     l=all_results[bestModel-1]['lr']
     dr=all_results[bestModel-1]['decay_rate']
     i=all_results[bestModel-1]['epoch']
-    ##    l = 0.00075
-    ##    dr = 1
-    ##    i = 120
+    # l = 0.001
+    # dr = 0.85
+    # i = 50
     print 'lrate:',l
     print 'decay rate',dr
     print 'epochs',i
