@@ -257,61 +257,61 @@ saver = tf.train.Saver(max_to_keep=100)
 valResult = []
 bestScore = 0.0
 
-##for l in np.arange(lrate,lrate+5e-4,15e-5):
-##    for d in np.arange(decay_rate,1.01,0.15):
-##        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-##            sess.run(tf.global_variables_initializer())
-##            for i in range(epochs):
-##                total_accs = 0.0
-##                total_loss = 0.0
-##                new_index = np.random.permutation(y_train.shape[0])
-##                trainX = X_train[new_index]
-##                trainY = y_train[new_index]
-##                _lr = l*(d**(i/decay_num))
-##                for b in range(tr_batch_num):
-##                    #get batch
-##                    if b==tr_batch_num-1:
-##                        x_batch = trainX[b*batch_size:,:,:]
-##                        y_batch = trainY[b*batch_size:,:]
-##                    else:
-##                        x_batch = trainX[b*batch_size:(b+1)*batch_size,:,:]
-##                        y_batch = trainY[b*batch_size:(b+1)*batch_size,:]
-##                    #update gradient
-##                    fetches = [accuracy, cost, train_op]
-##                    feed_dict = {data:x_batch,target:y_batch,lr:_lr,dropout:1}
-##                    acc, loss, _ = sess.run(fetches, feed_dict)
-##                    total_accs = total_accs+acc
-##                    total_loss = total_loss+loss
-##                mean_acc = total_accs/tr_batch_num
-##                mean_loss = total_loss/tr_batch_num
-##                if (i + 1) % display_num == 0:
-##                    print 'learning rate:',l,'decay_rate:',d
-##                    print 'epoch',i+1
-##                    print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
-##                if (i+1)>=100 and (i+1)%10==0:
-##                    print '**VAL RESULT:'
-##                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
-##                    print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
-##                    valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
-##                    if bestScore<val_score:
-##                        bestScore = val_score
-##                        bestModel = len(valResult)
-##                    #save model
-##                    save_path = saver.save(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i+1))
-##
-##for vRes in valResult:
-##    print vRes
+for l in np.arange(lrate,lrate+5e-4,15e-5):
+    for d in np.arange(decay_rate,1.01,0.15):
+        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+            sess.run(tf.global_variables_initializer())
+            for i in range(epochs):
+                total_accs = 0.0
+                total_loss = 0.0
+                new_index = np.random.permutation(y_train.shape[0])
+                trainX = X_train[new_index]
+                trainY = y_train[new_index]
+                _lr = l*(d**(i/decay_num))
+                for b in range(tr_batch_num):
+                    #get batch
+                    if b==tr_batch_num-1:
+                        x_batch = trainX[b*batch_size:,:,:]
+                        y_batch = trainY[b*batch_size:,:]
+                    else:
+                        x_batch = trainX[b*batch_size:(b+1)*batch_size,:,:]
+                        y_batch = trainY[b*batch_size:(b+1)*batch_size,:]
+                    #update gradient
+                    fetches = [accuracy, cost, train_op]
+                    feed_dict = {data:x_batch,target:y_batch,lr:_lr,dropout:1}
+                    acc, loss, _ = sess.run(fetches, feed_dict)
+                    total_accs = total_accs+acc
+                    total_loss = total_loss+loss
+                mean_acc = total_accs/tr_batch_num
+                mean_loss = total_loss/tr_batch_num
+                if (i + 1) % display_num == 0:
+                    print 'learning rate:',l,'decay_rate:',d
+                    print 'epoch',i+1
+                    print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
+                if (i+1)>=100 and (i+1)%10==0:
+                    print '**VAL RESULT:'
+                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
+                    print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
+                    valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
+                    if bestScore<val_score:
+                        bestScore = val_score
+                        bestModel = len(valResult)
+                    #save model
+                    save_path = saver.save(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i+1))
+
+for vRes in valResult:
+    print vRes
     
 #check best model and apply on test model
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-##    #get best model
-##    l = valResult[bestModel-1]['lr']
-##    dr = valResult[bestModel-1]['decay_rate']
-##    i = valResult[bestModel-1]['epoch']
-    l = 0.00075
-    dr = 1
-    i = 120
+    #get best model
+    l = valResult[bestModel-1]['lr']
+    dr = valResult[bestModel-1]['decay_rate']
+    i = valResult[bestModel-1]['epoch']
+##    l = 0.00075
+##    dr = 1
+##    i = 120
     print 'lrate:',l
     print 'decay rate',dr
     print 'epochs',i
