@@ -1,8 +1,6 @@
 #Features
 import simstring
 import numpy as np
-##import simstring
-
 config_params={
 "feature_names":[
 "is_all_caps", #0
@@ -82,10 +80,10 @@ SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
 
 MAX_WINDOW=5
 
-##SS_METRIC=simstring.jaccard
-##SS_THRESHOLD=0.4
+SS_METRIC=simstring.jaccard
+SS_THRESHOLD=0.4
 
 EMD_SIZE=200
 
-LR_RANGE=[i for i in np.arange(1e-4,5e-3,2e-4)]
-DECAY_RATE=[i for i in np.arange(0.8,0.95,0.05)]
+LR_RANGE=[1e-4,5e-4,1e-3,5e-3,1e-2]
+DECAY_RATE=[0.8,0.85,0.9]
