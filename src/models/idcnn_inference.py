@@ -10,7 +10,7 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-
+import update_results
 #loading umaass data
 ##with open('../../data/umass_train.pkl', 'rb') as inp:
 ##    X_train = pickle.load(inp)
@@ -320,5 +320,6 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     test_acc, test_cost,test_score = testModule(X_test,y_test,True)
     print '**TEST RESULT:'
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
-
+    print 'Updating the RESULTS file....'
+    update_results.update_results('ID-CNN',test_score)
             
