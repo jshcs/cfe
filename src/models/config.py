@@ -66,6 +66,10 @@ WE_BIN="../../data/PMC-w2v.bin"
 WE_TXT="../../data/PMC-w2v.txt"
 WE_PKL="../../data/PMC-w2v.pickle"
 
+
+RESULTS="../../data/results.json"
+
+
 ALL_TAGS=['person','title','journal','year','volume','pages']
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
@@ -77,6 +81,33 @@ labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
 BRACKETS={'(':')','[':']','{':'}'}
 
 SPCL_KEYS=['Page', 'Pg.', 'Vol.', 'Volume', 'page', 'pg.', 'vol.', 'volume']
+
+feature_descriptions=[
+    'Is the token in uppercase?',
+    'Is the token capitalized?',
+    'Is the token alpha-numeric?',
+    'Length of the token',
+    'Is the token numeric?',
+    'Does the token end with a period?',
+    'Is the token enclosed within brackets?',
+    'Does the token contain hyphen(s)?',
+    'Does the token contain colon(s)?',
+    'Is the token "et al"?',
+    'Is the token a valid year?',
+    'Is the token a special keyword like pg., vol., etc?',
+    'Does the token end with ".."?',
+    'Does the token end with ".,"?',
+    'Is the token a url?',
+    'Is the token an email address?',
+    'Could the token be a first name?',
+    'Could the token be a last name?',
+    'Could the token be a journal name?',
+    'Is the token a biomed term?',
+    'Biomed word embedding(length 200)'
+
+]
+
+MODELS=['CRF','LSTM','Bi-LSTM','ID-CNN']
 
 MAX_WINDOW=5
 

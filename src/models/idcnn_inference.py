@@ -9,7 +9,8 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import itertools
+import update_results
 #loading umaass data
 ##with open('../../data/umass_train.pkl', 'rb') as inp:
 ##    X_train = pickle.load(inp)
@@ -174,6 +175,38 @@ optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 
 train_op = optimizer.apply_gradients(zip(grads, tvars),global_step=tf.contrib.framework.get_or_create_global_step())
 
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Reds):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
 #test on other data set (valid or test)
 ##test_batch_size = 100
 def testModule(data_x,data_y,final):
@@ -205,6 +238,10 @@ def testModule(data_x,data_y,final):
         plt.figure()
         sn.heatmap(df_cm,annot=True)
         plt.savefig('idcnnResultExclude.png')
+        plt.figure()
+        plot_confusion_matrix(cm, classes=target_names, normalize=True,
+                              title='ID-CNN confusion matrix')
+        plt.savefig('idcnnResultNor.png')
 
     return _accs, _costs, _scores
 
@@ -268,7 +305,6 @@ for vRes in valResult:
 #check best model and apply on test model
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-##    #get best model
     l = valResult[bestModel-1]['lr']
     dr = valResult[bestModel-1]['decay_rate']
     i = valResult[bestModel-1]['epoch']
@@ -283,5 +319,5 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     test_acc, test_cost,test_score = testModule(X_test,y_test,True)
     print '**TEST RESULT:'
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
-
-            
+    print 'Updating the RESULTS file....'
+    update_results.update_results('ID-CNN',test_score)
