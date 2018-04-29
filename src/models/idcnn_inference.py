@@ -206,7 +206,7 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-    
+
 #test on other data set (valid or test)
 ##test_batch_size = 100
 def testModule(data_x,data_y,final):
@@ -305,7 +305,6 @@ for vRes in valResult:
 #check best model and apply on test model
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    #get best model
     l = valResult[bestModel-1]['lr']
     dr = valResult[bestModel-1]['decay_rate']
     i = valResult[bestModel-1]['epoch']
@@ -322,4 +321,3 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
     print 'Updating the RESULTS file....'
     update_results.update_results('ID-CNN',test_score)
-            
