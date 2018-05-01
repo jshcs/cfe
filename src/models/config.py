@@ -68,6 +68,7 @@ WE_PKL="../../data/PMC-w2v.pickle"
 
 
 RESULTS="../../data/results.json"
+PARAMS="../../data/params.json"
 
 
 ALL_TAGS=['person','title','journal','year','volume','pages']

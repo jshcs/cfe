@@ -15,6 +15,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import update_results
+from utils import *
+import json
 
 class LSTM_Model():
     def __init__(self,use_gpu=False,do_test=False):
@@ -145,13 +147,13 @@ class LSTM_Model():
             print 'cm shape',cm.shape
 
             plt.figure()
-            self.plot_confusion_matrix(cm,classes=self.target_names[:-1],
+            plot_confusion_matrix(cm,classes=self.target_names[:-1],
                                   title='LSTM consusion matrix w/o normalization')
             plt.savefig('lstm_cm_no_norm.png')
 
             # Plot normalized confusion matrix
             plt.figure()
-            self.plot_confusion_matrix(cm,classes=self.target_names[:-1],normalize=True,
+            plot_confusion_matrix(cm,classes=self.target_names[:-1],normalize=True,
                                   title='LSTM confusion matrix')
 
             plt.savefig('lstm_cm_norm.png')
@@ -201,19 +203,19 @@ class LSTM_Model():
                             self.bestModel=len(self.all_results)
                         #save model
                         save_path=self.saver.save(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lrate,decay_rate,epoch+1))
+
+        hparams={'lr':self.all_results[self.bestModel-1]['lr'],'d':self.all_results[self.bestModel-1]['decay_rate'],'epoch':self.all_results[self.bestModel-1]['epoch']}
+        update_results.update_params('LSTM',hparams)
+
     def test_on_testset(self):
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as self.sess:
-            ##    #get best model
-            # l=self.all_results[self.bestModel-1]['lr']
-            # dr=self.all_results[self.bestModel-1]['decay_rate']
-            # i=self.all_results[self.bestModel-1]['epoch']
-            l = 0.001
-            dr = 0.85
-            i = 50
-            print 'lrate:',l
-            print 'decay rate',dr
-            print 'epochs',i
-            self.saver.restore(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+            with open(PARAMS,'r') as res:
+                params=json.load(res)
+            lr,d,epoch=params['LSTM']['lr'],params['LSTM']['d'],params['LSTM']['epoch']
+            print 'lrate:',lr
+            print 'decay rate',d
+            print 'epochs',epoch
+            self.saver.restore(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lr,d,epoch))
             #evaluation the model on test set
             test_acc,test_cost,test_score,out_dict=self.test_epoch(self.X_test,self.y_test,True)
             print '**TEST RESULT:'
@@ -225,41 +227,46 @@ class LSTM_Model():
             updated_score=float("{0:.3f}".format(updated_score))
             update_results.update_results('LSTM',updated_score)
 
-    def plot_confusion_matrix(self,cm, classes,
-                              normalize=False,
-                              title='LSTM Confusion matrix',
-                              cmap=plt.cm.Reds):
-        if normalize:
-            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-
-        print(cm)
-
-        plt.imshow(cm, interpolation='nearest', cmap=cmap)
-        plt.title(title)
-        plt.colorbar()
-        tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes, rotation=45)
-        plt.yticks(tick_marks, classes)
-
-        fmt = '.2f' if normalize else 'd'
-        thresh = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            plt.text(j, i, format(cm[i, j], fmt),
-                     horizontalalignment="center",
-                     color="white" if cm[i, j] > thresh else "black")
-
-        plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
+    def predict(self,data_x):
+        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as self.sess:
+            with open(PARAMS,'r') as res:
+                params=json.load(res)
+            lr,d,epoch=params['LSTM']['lr'],params['LSTM']['d'],params['LSTM']['epoch']
+            print 'lrate:',lr
+            print 'decay rate',d
+            print 'epochs',epoch
+            self.saver.restore(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lr,d,epoch))
+            #evaluation the model on test set
+            fetches=[self.label_pred]
+            data_size=data_x.shape[0]
+            #X_batch,y_batch=data_x,data_y
+            feed_dict={self.data:data_x,self.batch_size:data_size,self.keep_prob:1.0}
+            _pred=self.sess.run(fetches,feed_dict)
+            #F1 result
+            print _pred
+            print np.array(_pred).shape
+            _pred=np.argmax(_pred,axis=2)
+            print _pred
+            print _pred.shape
+            pred=np.reshape(_pred,(1,-1))
+            print _pred
+            print _pred.shape
+            pred=np.squeeze(pred)
+            print pred
+            print pred.shape
 
     def run_lstm(self):
         self.get_data()
         self.make_model()
 
-        if self.do_test==False:
-            self.train()
-        else:
-            self.test_on_testset()
+        # if self.do_test==False:
+        #     self.train()
+        # else:
+        #     self.test_on_testset()
+        get_sample_citations()
+        self.predict(self.X_test[:5,:,:])
+
+
 
 
 model=LSTM_Model(use_gpu=False,do_test=True)
