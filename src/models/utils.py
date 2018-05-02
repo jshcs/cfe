@@ -21,11 +21,11 @@ def map_features_vec(features_map):
 
 def get_data(dataset_type):
     if dataset_type=="train":
-        data_obj=GetDict(TRAIN_FILE)
+        data_obj=GetDict(TRAIN_FILE,TR_SENT_FILE)
     elif dataset_type=="test":
-        data_obj=GetDict(TEST_FILE)
+        data_obj=GetDict(TEST_FILE,TST_SENT_FILE)
     elif dataset_type=="dev":
-        data_obj=GetDict(DEV_FILE)
+        data_obj=GetDict(DEV_FILE,DEV_SENT_FILE)
 
     data_obj.make_dict()
     data=data_obj.get_all_dict()
