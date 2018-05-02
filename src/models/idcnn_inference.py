@@ -4,13 +4,14 @@ from tensorflow.contrib.layers.python.layers import initializers
 from config import *
 import pickle
 from sklearn.metrics import f1_score
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report,precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import update_results
+import json
 #loading umaass data
 ##with open('../../data/umass_train.pkl', 'rb') as inp:
 ##    X_train = pickle.load(inp)
@@ -228,6 +229,13 @@ def testModule(data_x,data_y,final):
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
     print(classification_report(ground_truth,pred,target_names=target_names))
+    clf_rep=precision_recall_fscore_support(ground_truth,pred)
+    out_dict={
+            "precision":clf_rep[0].round(2)
+            ,"recall":clf_rep[1].round(2)
+            ,"f1-score":clf_rep[2].round(2)
+            ,"support":clf_rep[3]
+    }
     if final==True:
         cm=confusion_matrix(ground_truth,pred)
         print 'cm shape',cm.shape
@@ -243,7 +251,7 @@ def testModule(data_x,data_y,final):
                               title='ID-CNN confusion matrix')
         plt.savefig('idcnnResultNor.png')
 
-    return _accs, _costs, _scores
+    return _accs, _costs, _scores,out_dict
 
 #begin to train
 batch_size = 50
@@ -256,7 +264,7 @@ saver = tf.train.Saver(max_to_keep=100)
 
 valResult = []
 bestScore = 0.0
-
+# all_results=[]
 for l in np.arange(lrate,lrate+5e-4,15e-5):
     for d in np.arange(decay_rate,1.01,0.15):
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -290,7 +298,7 @@ for l in np.arange(lrate,lrate+5e-4,15e-5):
                     print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
                 if (i+1)>=100 and (i+1)%10==0:
                     print '**VAL RESULT:'
-                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
+                    val_acc, val_cost,val_score,_ = testModule(X_valid,y_valid,False)
                     print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
                     valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
                     if bestScore<val_score:
@@ -298,6 +306,10 @@ for l in np.arange(lrate,lrate+5e-4,15e-5):
                         bestModel = len(valResult)
                     #save model
                     save_path = saver.save(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i+1))
+hparams={'lr':valResult[bestModel-1]['lr'],
+                         'd':valResult[bestModel-1]['decay_rate'],
+                         'epoch':valResult[bestModel-1]['epoch']}
+update_results.update_params('ID-CNN',hparams)
 
 for vRes in valResult:
     print vRes
@@ -305,19 +317,33 @@ for vRes in valResult:
 #check best model and apply on test model
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    l = valResult[bestModel-1]['lr']
-    dr = valResult[bestModel-1]['decay_rate']
-    i = valResult[bestModel-1]['epoch']
+    # l = valResult[bestModel-1]['lr']
+    # dr = valResult[bestModel-1]['decay_rate']
+    # i = valResult[bestModel-1]['epoch']
 ##    l = 0.00075
 ##    dr = 1
 ##    i = 120
-    print 'lrate:',l
-    print 'decay rate',dr
-    print 'epochs',i
-    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+    with open(PARAMS,'r') as res:
+        params=json.load(res)
+    lr,d,epoch=params['ID-CNN']['lr'],params['ID-CNN']['d'],params['ID-CNN']['epoch']
+    print 'lrate:',lr
+    print 'decay rate',d
+    print 'epochs',epoch
+    # print 'lrate:',l
+    # print 'decay rate',dr
+    # print 'epochs',i
+    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lr,d,epoch))
     #evaluation the model on test set
-    test_acc, test_cost,test_score = testModule(X_test,y_test,True)
+    test_acc, test_cost,test_score,out_dict = testModule(X_test,y_test,True)
     print '**TEST RESULT:'
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
     print 'Updating the RESULTS file....'
+
+    f1_scores=out_dict['f1-score'][:-1]
+    support=out_dict['support'][:-1]
+    updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
+    updated_score=float("{0:.3f}".format(updated_score))
+    #update_results.update_results('LSTM',updated_score)
     update_results.update_results('ID-CNN',test_score)
+
+
