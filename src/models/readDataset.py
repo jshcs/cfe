@@ -12,14 +12,19 @@ from gensim.models.keyedvectors import KeyedVectors
 #     all_vocab=pickle.load(v)
 with open(BIO_SRT,'rb') as v:
     all_bio_vocab=pickle.load(v)
+print "all_bio_vocab loaded...."
 WV=KeyedVectors.load_word2vec_format(WE_BIN, binary=True)
+print "embeddings loaded...."
 sorted_fname=read_sorted_file_into_array(SORTED_FPERSON_FNAME)
+print "sorted_fperson_name loaded...."
 sorted_lname=read_sorted_file_into_array(SORTED_LPERSON_FNAME)
+print "sorted_lperson_name_loaded...."
 bio_dict={voc:1 for voc in all_bio_vocab}
 # journal_dict={voc:1 for voc in all_vocab}
 
 #sorted_journals=read_sorted_file_into_array(COMBINED_JNAMES)
 sorted_journals_db=simstring.reader(DB_JNAMES)
+print "journal_name_db loaded...."
 sorted_journals_db.measure=SS_METRIC
 sorted_journals_db.threshold=SS_THRESHOLD
 # sorted_journals=[[t.lower() for t in ele.split()] for ele in sorted_journals]
@@ -41,6 +46,7 @@ def read_dataset(data_type):
         c+=1
         tokensStr = Data[s][0]
         labelsStr = Data[s][1]
+
         len_string=len(tokensStr)
 
         if len(tokensStr)>=config_params["max_stream_length"]:
@@ -57,9 +63,12 @@ def read_dataset(data_type):
         #print vectorized_features.shape
         if len(tokensStr)<config_params["max_stream_length"]:
             diff=config_params["max_stream_length"]-len(tokensStr)
+            # print "diff:",diff
             extra_features = np.zeros((diff,n_features))
             vectorized_features = np.concatenate((vectorized_features, extra_features), axis=0)
+            # print "before padding:",len(labelsStr)
             labelsStr+=[len(labels)]*diff
+            # print "after padding:",len(labelsStr)
         vectorized_features = np.expand_dims(vectorized_features, axis=0)
         # print vectorized_features
         data_feature=np.concatenate((data_feature,vectorized_features),axis=0)
@@ -71,6 +80,10 @@ def read_dataset(data_type):
         #data_feature.append(vectorized_features)
         #print 'data_feature.shape',data_feature.shape
         data_target.append(onehot_labels)
+        # print labelsStr
+        # print s
+        # print len(tokensStr),len(labelsStr)
+        # print np.array(data_target).shape
         end_time=time.time()
         total_time+=(end_time-start)
         print "Sentences done:",c,"in:",(end_time-start),"total time:",total_time,"avg time:",(float(total_time)/c),"length:",len_string

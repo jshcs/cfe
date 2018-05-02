@@ -43,6 +43,10 @@ TRAIN_FILE='../../data/umass_cfe/training.docs'
 TEST_FILE='../../data/umass_cfe/testing.docs'
 DEV_FILE='../../data/umass_cfe/dev.docs'
 
+TR_SENT_FILE='../../data/umass_tr_sentences.npy'
+TST_SENT_FILE='../../data/umass_tst_sentences.npy'
+DEV_SENT_FILE='../../data/umass_dev_sentences.npy'
+
 SORTED_FPERSON_FNAME="../../data/sorted-person-first.txt"
 SORTED_LPERSON_FNAME="../../data/sorted-person-last.txt"
 UNSRT_FPERSON_FNAME="../../data/person-first.txt"
@@ -68,15 +72,20 @@ WE_PKL="../../data/PMC-w2v.pickle"
 
 
 RESULTS="../../data/results.json"
+PARAMS="../../data/params.json"
 
 
-ALL_TAGS=['person','title','journal','year','volume','pages']
+#ALL_TAGS=['person','title','journal','year','volume','pages']
+ALL_TAGS=['B-person','I-person','B-title','I-title','B-journal','I-journal','B-year','I-year','B-volume','I-volume','B-pages','I-pages']
+
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
 #styleFile = ['mit-chicago','natbib','siamplain','spbasic']
 PUNCT=[".",",",";",":"]
 
-labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
+#labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
+pos_labels=['person','title','journal','year','volume','pages']
+labels={'B-person':0,'I-person':1,'B-title':2,'I-title':3,'B-journal':4,'I-journal':5,'B-year':6,'I-year':7,'B-volume':8,'I-volume':9,'B-pages':10,'I-pages':11}
 
 BRACKETS={'(':')','[':']','{':'}'}
 

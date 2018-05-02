@@ -4,7 +4,7 @@ import numpy as np
 from config import *
 from umass_parser import *
 from features import *
-from readDataset import *
+from readDataset import read_dataset,read_bibtex_dataset
 import pickle
 import os
 
@@ -66,7 +66,12 @@ def main():
         # with open('../../data/we_pickles/'+style+'_test.pickle', 'wb') as outp:
         #     pickle.dump(np.array(test_token), outp)
         #     pickle.dump(np.array(test_label), outp)
-
+        print X_train.shape,bibtex_X_train.shape
+        print X_test.shape,bibtex_X_test.shape
+        print X_valid.shape,bibtex_X_valid.shape
+        print y_train.shape,bibtex_y_train.shape
+        print y_test.shape,bibtex_y_test.shape
+        print y_valid.shape,bibtex_y_valid.shape
         X_train=np.concatenate((X_train,bibtex_X_train),axis=0)
         y_train=np.concatenate((y_train,bibtex_y_train),axis=0)
         X_valid=np.concatenate((X_valid,bibtex_X_valid),axis=0)
