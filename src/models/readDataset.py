@@ -124,6 +124,8 @@ def read_bibtex_dataset(Data):
         data_feature=np.concatenate((data_feature,vectorized_features),axis=0)
 
         labelsStr=np.array(labelsStr)
+        #print len(labels)
+        #print labelsStr
         onehot_labels=np.eye(len(labels)+1)[labelsStr]
 
         data_target.append(onehot_labels)
