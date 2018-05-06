@@ -43,13 +43,14 @@ class LSTM_Model():
 
     def get_data(self):
         print "Unloading the dataset...."
-
-        self.X_train=np.load('../../data/we_npy/combined_X_train.npy')
-        self.y_train=np.load('../../data/we_npy/combined_y_train.npy')
-        self.X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
-        self.y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
-        self.X_test=np.load('../../data/we_npy/combined_X_test.npy')
-        self.y_test=np.load('../../data/we_npy/combined_y_test.npy')
+        # data_zip=np.load('../../data/we_npy/combined_dataset.npz')
+        data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
+        self.X_train=data_zip['combined_X_train.npy']
+        self.y_train=data_zip['combined_y_train.npy']
+        self.X_valid=data_zip['combined_X_valid.npy']
+        self.y_valid=data_zip['combined_y_valid.npy']
+        self.X_test=data_zip['combined_X_test.npy']
+        self.y_test=data_zip['combined_y_test.npy']
 
         print "Loaded the dataset...."
         print self.X_train.shape,self.X_valid.shape,self.X_test.shape,self.y_train.shape,self.y_valid.shape,self.y_test.shape
@@ -193,7 +194,7 @@ class LSTM_Model():
                     print 'learning rate:',lrate,'decay_rate:',decay_rate
                     print 'epoch',epoch+1
                     print 'training %d, acc=%g, cost=%g '%(self.y_train.shape[0],mean_acc,mean_cost)
-                    if (epoch+1)>=50:
+                    if (epoch+1)>=self.epochs:
                         print '**VAL RESULT:'
                         val_acc,val_cost,val_score,_=self.test_epoch(self.X_valid,self.y_valid,False)
                         print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(self.y_valid.shape[0],val_acc,val_cost,val_score)
@@ -259,15 +260,17 @@ class LSTM_Model():
         self.get_data()
         self.make_model()
 
-        # if self.do_test==False:
-        #     self.train()
-        # else:
-        #     self.test_on_testset()
-        get_sample_citations()
-        self.predict(self.X_test[:5,:,:])
+        if self.do_test==False:
+            self.train()
+            self.test_on_testset()
+        else:
+            self.test_on_testset()
+        # get_sample_citations()
+        # self.predict(self.X_test[:5,:,:])
 
 
 
 
-model=LSTM_Model(use_gpu=False,do_test=True)
+model=LSTM_Model(use_gpu=False,do_test=False)
 model.run_lstm()
+
