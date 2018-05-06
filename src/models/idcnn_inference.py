@@ -4,61 +4,27 @@ from tensorflow.contrib.layers.python.layers import initializers
 from config import *
 import pickle
 from sklearn.metrics import f1_score
-from sklearn.metrics import classification_report,precision_recall_fscore_support
+from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-import update_results
-import json
-#loading umaass data
-##with open('../../data/umass_train.pkl', 'rb') as inp:
-##    X_train = pickle.load(inp)
-##    y_train = pickle.load(inp)
-##
-##with open('../../data/umass_val.pkl', 'rb') as inp:
-##    X_valid = pickle.load(inp)
-##    y_valid = pickle.load(inp)
-##
-##with open('../../data/umass_test.pickle', 'rb') as inp:
-##    X_test = pickle.load(inp)
-##    y_test = pickle.load(inp)
-##
-##print 'finish reading umass data'
-##
-###loading bobtex data
-##for style in styleFile:
-##    with open('../../data/'+style+'_train.pkl', 'rb') as inp:
-##        bibtex_X_train = pickle.load(inp)
-##        bibtex_y_train = pickle.load(inp)
-##
-##    with open('../../data/'+style+'_val.pkl', 'rb') as inp:
-##        bibtex_X_valid = pickle.load(inp)
-##        bibtex_y_valid = pickle.load(inp)
-##
-##    with open('../../data/'+style+'_test.pickle', 'rb') as inp:
-##        bibtex_X_test = pickle.load(inp)
-##        bibtex_y_test = pickle.load(inp)
-##
-##    X_train = np.concatenate((X_train,bibtex_X_train),axis = 0)
-##    y_train = np.concatenate((y_train,bibtex_y_train),axis = 0)
-##    X_valid = np.concatenate((X_valid,bibtex_X_valid),axis = 0)
-##    y_valid = np.concatenate((y_valid,bibtex_y_valid),axis = 0)
-##    X_test = np.concatenate((X_test,bibtex_X_test),axis = 0)
-##    y_test = np.concatenate((y_test,bibtex_y_test),axis = 0)
-##
-##    print 'finish reading '+style+' data'
-##    print 'train data number',y_train.shape[0],style,bibtex_y_train.shape[0]
-##    print 'valid data number',y_valid.shape[0],style,bibtex_y_valid.shape[0]
-##    print 'test data number',y_test.shape[0],style,bibtex_y_test.shape[0]
 
-X_train=np.load('../../data/we_npy/combined_X_train.npy')
-y_train=np.load('../../data/we_npy/combined_y_train.npy')
-X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
-y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
-X_test=np.load('../../data/we_npy/combined_X_test.npy')
-y_test=np.load('../../data/we_npy/combined_y_test.npy')
+#loading data
+data_zip=np.load('../../data/we_npy/combined_dataset.npz')
+X_train=data_zip['combined_X_train.npy']
+y_train=data_zip['combined_y_train.npy']
+X_valid=data_zip['combined_X_valid.npy']
+y_valid=data_zip['combined_y_valid.npy']
+X_test=data_zip['combined_X_test.npy']
+y_test=data_zip['combined_y_test.npy']
+##X_train=np.load('../../data/we_npy/combined_X_train.npy')
+##y_train=np.load('../../data/we_npy/combined_y_train.npy')
+##X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
+##y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
+##X_test=np.load('../../data/we_npy/combined_X_test.npy')
+##y_test=np.load('../../data/we_npy/combined_y_test.npy')
 
 print 'input size'
 print X_train.shape,X_valid.shape,X_test.shape
@@ -207,7 +173,7 @@ def plot_confusion_matrix(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-
+    
 #test on other data set (valid or test)
 ##test_batch_size = 100
 def testModule(data_x,data_y,final):
@@ -219,6 +185,9 @@ def testModule(data_x,data_y,final):
     data_size = data_y.shape[0]
     feed_dict = {data:data_x, target:data_y, dropout:1.0}
     _accs, _costs, _pred = sess.run(fetches, feed_dict)
+    #save result
+    if final==True:
+        np.save('final_model/test_result.npy',_pred,allow_pickle=False)
     #F1 result
     _pred = np.argmax(_pred, axis = 2)
     pred = np.reshape(_pred,(1,-1))
@@ -229,29 +198,22 @@ def testModule(data_x,data_y,final):
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
     print(classification_report(ground_truth,pred,target_names=target_names))
-    clf_rep=precision_recall_fscore_support(ground_truth,pred)
-    out_dict={
-            "precision":clf_rep[0].round(2)
-            ,"recall":clf_rep[1].round(2)
-            ,"f1-score":clf_rep[2].round(2)
-            ,"support":clf_rep[3]
-    }
-    if final==True:
-        cm=confusion_matrix(ground_truth,pred)
-        print 'cm shape',cm.shape
-        cm = cm[:len(labels),:len(labels)]
-        print 'cm shape',cm.shape
-        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
-                             columns = [i for i in target_names])
-        plt.figure()
-        sn.heatmap(df_cm,annot=True)
-        plt.savefig('idcnnResultExclude.png')
-        plt.figure()
-        plot_confusion_matrix(cm, classes=target_names, normalize=True,
-                              title='ID-CNN confusion matrix')
-        plt.savefig('idcnnResultNor.png')
+        
+##        cm=confusion_matrix(ground_truth,pred)
+##        print 'cm shape',cm.shape
+##        cm = cm[:len(labels),:len(labels)]
+##        print 'cm shape',cm.shape
+##        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
+##                             columns = [i for i in target_names])
+##        plt.figure()
+##        sn.heatmap(df_cm,annot=True)
+##        plt.savefig('idcnnResultExclude.png')
+##        plt.figure()
+##        plot_confusion_matrix(cm, classes=target_names, normalize=True,
+##                              title='ID-CNN confusion matrix')
+##        plt.savefig('idcnnResultNor.png')
 
-    return _accs, _costs, _scores,out_dict
+    return _accs, _costs, _scores
 
 #begin to train
 batch_size = 50
@@ -264,9 +226,9 @@ saver = tf.train.Saver(max_to_keep=100)
 
 valResult = []
 bestScore = 0.0
-# all_results=[]
-for l in np.arange(lrate,lrate+5e-4,15e-5):
-    for d in np.arange(decay_rate,1.01,0.15):
+
+for l in LR_RANGE:
+    for d in DECAY_RATE:
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             sess.run(tf.global_variables_initializer())
             for i in range(epochs):
@@ -298,7 +260,7 @@ for l in np.arange(lrate,lrate+5e-4,15e-5):
                     print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
                 if (i+1)>=100 and (i+1)%10==0:
                     print '**VAL RESULT:'
-                    val_acc, val_cost,val_score,_ = testModule(X_valid,y_valid,False)
+                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
                     print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
                     valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
                     if bestScore<val_score:
@@ -306,10 +268,6 @@ for l in np.arange(lrate,lrate+5e-4,15e-5):
                         bestModel = len(valResult)
                     #save model
                     save_path = saver.save(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i+1))
-hparams={'lr':valResult[bestModel-1]['lr'],
-                         'd':valResult[bestModel-1]['decay_rate'],
-                         'epoch':valResult[bestModel-1]['epoch']}
-update_results.update_params('ID-CNN',hparams)
 
 for vRes in valResult:
     print vRes
@@ -317,33 +275,25 @@ for vRes in valResult:
 #check best model and apply on test model
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    # l = valResult[bestModel-1]['lr']
-    # dr = valResult[bestModel-1]['decay_rate']
-    # i = valResult[bestModel-1]['epoch']
+    #get best model
+    l = valResult[bestModel-1]['lr']
+    dr = valResult[bestModel-1]['decay_rate']
+    i = valResult[bestModel-1]['epoch']
 ##    l = 0.00075
 ##    dr = 1
 ##    i = 120
-    with open(PARAMS,'r') as res:
-        params=json.load(res)
-    lr,d,epoch=params['ID-CNN']['lr'],params['ID-CNN']['d'],params['ID-CNN']['epoch']
-    print 'lrate:',lr
-    print 'decay rate',d
-    print 'epochs',epoch
-    # print 'lrate:',l
-    # print 'decay rate',dr
-    # print 'epochs',i
-    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lr,d,epoch))
+    print 'lrate:',l
+    print 'decay rate',dr
+    print 'epochs',i
+    print l,dr,i
+    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+    #save model
+    save_path = saver.save(sess, 'final_model/idcnn-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+
     #evaluation the model on test set
-    test_acc, test_cost,test_score,out_dict = testModule(X_test,y_test,True)
+    test_acc, test_cost,test_score = testModule(X_test,y_test,True)
     print '**TEST RESULT:'
     print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
-    print 'Updating the RESULTS file....'
+    
 
-    f1_scores=out_dict['f1-score'][:-1]
-    support=out_dict['support'][:-1]
-    updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
-    updated_score=float("{0:.3f}".format(updated_score))
-    #update_results.update_results('LSTM',updated_score)
-    update_results.update_results('ID-CNN',test_score)
-
-
+            
