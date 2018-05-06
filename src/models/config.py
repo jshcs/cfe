@@ -26,7 +26,7 @@ config_params={
 "word_embeddings" #20
 ],
 #Training params
-"epochs":50,
+"epochs":10,
 "lrate":1e-4,
 "lrate_decay":0.8,
 "do_bnorm":True,
@@ -43,9 +43,14 @@ TRAIN_FILE='../../data/umass_cfe/training.docs'
 TEST_FILE='../../data/umass_cfe/testing.docs'
 DEV_FILE='../../data/umass_cfe/dev.docs'
 
-TR_SENT_FILE='../../data/umass_tr_sentences.npy'
-TST_SENT_FILE='../../data/umass_tst_sentences.npy'
-DEV_SENT_FILE='../../data/umass_dev_sentences.npy'
+# TR_SENT_FILE='../../data/umass_tr_sentences.npy'
+# TST_SENT_FILE='../../data/umass_tst_sentences.npy'
+# DEV_SENT_FILE='../../data/umass_dev_sentences.npy'
+
+TR_SENT_FILE='../../data/umass_tr_sentences_no_bio.npy'
+TST_SENT_FILE='../../data/umass_tst_sentences_no_bio.npy'
+DEV_SENT_FILE='../../data/umass_dev_sentences_no_bio.npy'
+
 
 SORTED_FPERSON_FNAME="../../data/sorted-person-first.txt"
 SORTED_LPERSON_FNAME="../../data/sorted-person-last.txt"
@@ -75,17 +80,17 @@ RESULTS="../../data/results.json"
 PARAMS="../../data/params.json"
 
 
-#ALL_TAGS=['person','title','journal','year','volume','pages']
-ALL_TAGS=['B-person','I-person','B-title','I-title','B-journal','I-journal','B-year','I-year','B-volume','I-volume','B-pages','I-pages']
+ALL_TAGS=['person','title','journal','year','volume','pages']
+# ALL_TAGS=['B-person','I-person','B-title','I-title','B-journal','I-journal','B-year','I-year','B-volume','I-volume','B-pages','I-pages']
 
 
 styleFile = ['biochem','bmc-mathphys','achemso','ajhg','mit-chicago','natbib','siamplain','spbasic']
 #styleFile = ['mit-chicago','natbib','siamplain','spbasic']
 PUNCT=[".",",",";",":"]
 
-#labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
-pos_labels=['person','title','journal','year','volume','pages']
-labels={'B-person':0,'I-person':1,'B-title':2,'I-title':3,'B-journal':4,'I-journal':5,'B-year':6,'I-year':7,'B-volume':8,'I-volume':9,'B-pages':10,'I-pages':11}
+labels = {'person':0,'title':1,'journal':2,'year':3,'volume':4,'pages':5}
+# pos_labels=['person','title','journal','year','volume','pages']
+# labels={'B-person':0,'I-person':1,'B-title':2,'I-title':3,'B-journal':4,'I-journal':5,'B-year':6,'I-year':7,'B-volume':8,'I-volume':9,'B-pages':10,'I-pages':11}
 
 BRACKETS={'(':')','[':']','{':'}'}
 
@@ -125,5 +130,7 @@ SS_THRESHOLD=0.4
 
 EMD_SIZE=200
 
-LR_RANGE=[1e-4,5e-4,1e-3,5e-3,1e-2]
-DECAY_RATE=[0.8,0.85,0.9]
+# LR_RANGE=[1e-4,5e-4,1e-3,5e-3,1e-2]
+# DECAY_RATE=[0.8,0.85,0.9]
+LR_RANGE=[5e-3]
+DECAY_RATE=[0.9]

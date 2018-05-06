@@ -79,12 +79,20 @@ def main():
         X_test=np.concatenate((X_test,bibtex_X_test),axis=0)
         y_test=np.concatenate((y_test,bibtex_y_test),axis=0)
 
-    np.save('../../data/we_npy/combined_X_train.npy',X_train,allow_pickle=False)
-    np.save('../../data/we_npy/combined_y_train.npy',y_train,allow_pickle=False)
-    np.save('../../data/we_npy/combined_X_valid.npy',X_valid,allow_pickle=False)
-    np.save('../../data/we_npy/combined_y_valid.npy',y_valid,allow_pickle=False)
-    np.save('../../data/we_npy/combined_X_test.npy',X_test,allow_pickle=False)
-    np.save('../../data/we_npy/combined_y_test.npy',y_test,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_X_train.npy',X_train,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_y_train.npy',y_train,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_X_valid.npy',X_valid,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_y_valid.npy',y_valid,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_X_test.npy',X_test,allow_pickle=False)
+    # np.save('../../data/we_npy/combined_y_test.npy',y_test,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_X_train.npy',X_train,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_y_train.npy',y_train,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_X_valid.npy',X_valid,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_y_valid.npy',y_valid,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_X_test.npy',X_test,allow_pickle=False)
+    # np.save('../../data/we_npy_no_bio/combined_y_test.npy',y_test,allow_pickle=False)
+    #
+    np.savez_compressed('../../data/we_npy_no_bio/combined_dataset.npz',combined_X_train=X_train,combined_y_train=y_train,combined_X_valid=X_valid,combined_y_valid=y_valid,combined_X_test=X_test,combined_y_test=y_test)
 
     print X_train.shape,X_valid.shape,X_test.shape,y_train.shape,y_valid.shape,y_test.shape
 
