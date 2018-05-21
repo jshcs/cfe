@@ -83,11 +83,11 @@ def get_raw_data(style):
 
 
 #for s in styleFile:
-testData = get_raw_data('tfnlm')
-x1,y1=readDataset.read_bibtex_dataset(testData)
+#testData = get_raw_data('tfnlm')
+#x1,y1=readDataset.read_bibtex_dataset(testData)
 testData=get_raw_data('sageH')
-x2,y2=readDataset.read_bibtex_dataset(testData)
-x1,y1=np.concatenate((x1,x2),axis=0),np.concatenate((y1,y2),axis=0)
+x1,y1=readDataset.read_bibtex_dataset(testData)
+#x1,y1=np.concatenate((x1,x2),axis=0),np.concatenate((y1,y2),axis=0)
 
 
 print x1.shape,y1.shape

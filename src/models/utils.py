@@ -1,10 +1,10 @@
 from config import *
-from umass_parser import *
+#from umass_parser import *
 from difflib import SequenceMatcher,get_close_matches
 from sklearn.metrics import jaccard_similarity_score
 from sklearn.metrics.pairwise import cosine_similarity
-from fuzzywuzzy import fuzz
-import Levenshtein
+#from fuzzywuzzy import fuzz
+#import Levenshtein
 import matplotlib
 matplotlib.use('Agg')
 from sklearn.metrics import confusion_matrix
