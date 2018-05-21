@@ -1,1 +1,1 @@
-{"Bi-LSTM": {}, "LSTM": {"epoch": 50, "lr": 0.001, "d": 0.85}, "CRF": {}, "ID-CNN": {}}
+{"Bi-LSTM": {}, "LSTM": {"epoch": 10, "lr": 0.005, "d": 0.9}, "CRF": {}, "ID-CNN": {}}
