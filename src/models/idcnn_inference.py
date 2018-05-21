@@ -11,14 +11,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 
+print 'start running'
+
 #loading data
-data_zip=np.load('../../data/we_npy/combined_dataset.npz')
-X_train=data_zip['combined_X_train.npy']
-y_train=data_zip['combined_y_train.npy']
-X_valid=data_zip['combined_X_valid.npy']
-y_valid=data_zip['combined_y_valid.npy']
-X_test=data_zip['combined_X_test.npy']
-y_test=data_zip['combined_y_test.npy']
+data_zip=np.load('../../data/we_npy/umass_dataset.npz')
+X_train=data_zip['X_train.npy']
+y_train=data_zip['y_train.npy']
+X_valid=data_zip['X_valid.npy']
+y_valid=data_zip['y_valid.npy']
+X_test=data_zip['X_test.npy']
+y_test=data_zip['y_test.npy']
 ##X_train=np.load('../../data/we_npy/combined_X_train.npy')
 ##y_train=np.load('../../data/we_npy/combined_y_train.npy')
 ##X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
@@ -198,20 +200,20 @@ def testModule(data_x,data_y,final):
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
     print(classification_report(ground_truth,pred,target_names=target_names))
-        
-##        cm=confusion_matrix(ground_truth,pred)
-##        print 'cm shape',cm.shape
-##        cm = cm[:len(labels),:len(labels)]
-##        print 'cm shape',cm.shape
-##        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
-##                             columns = [i for i in target_names])
-##        plt.figure()
-##        sn.heatmap(df_cm,annot=True)
-##        plt.savefig('idcnnResultExclude.png')
-##        plt.figure()
-##        plot_confusion_matrix(cm, classes=target_names, normalize=True,
-##                              title='ID-CNN confusion matrix')
-##        plt.savefig('idcnnResultNor.png')
+    if final==True:
+        cm=confusion_matrix(ground_truth,pred)
+        print 'cm shape',cm.shape
+        cm = cm[:len(labels),:len(labels)]
+        print 'cm shape',cm.shape
+        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
+                             columns = [i for i in target_names])
+        plt.figure()
+        sn.heatmap(df_cm,annot=True)
+        plt.savefig('idcnnResultExclude.png')
+        plt.figure()
+        plot_confusion_matrix(cm, classes=target_names, normalize=True,
+                              title='ID-CNN confusion matrix')
+        plt.savefig('idcnnResultCom.png')
 
     return _accs, _costs, _scores
 
