@@ -27,20 +27,20 @@ def write_once_to_params():
 
 
 #   dict={"lr":,"d":,"epoch":}
-def update_params(model,dict):
+def update_params(model1,model2,dict):
     with open(PARAMS,'r') as res:
         params=json.load(res)
 
-    params[model]=dict
+    params[model1][model2]=dict
 
     with open(PARAMS,'w') as res:
         json.dump(params,res)
 
-def update_results(model,f1):
+def update_results(model1,model2,f1):
     with open(RESULTS,'r') as res:
         results=json.load(res)
 
-    results[model]=f1
+    results[model1][model2]=f1
 
     with open(RESULTS,'w') as res:
         json.dump(results,res)

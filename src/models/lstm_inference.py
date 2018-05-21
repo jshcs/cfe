@@ -15,11 +15,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import update_results
-from utils import *
+from utils import plot_confusion_matrix
 import json
+from sklearn.utils import shuffle
 
 class LSTM_Model():
-    def __init__(self,use_gpu=False,do_test=False):
+    def __init__(self,train_set,use_gpu=False,do_test=False):
+        self.train_set=train_set
         self.X_train,self.y_train,self.X_valid,self.y_valid,self.X_test,self.y_test=None,None,None,None,None,None
         self.lrate=config_params["lrate"]
         self.num_units=config_params["num_units"]
@@ -33,7 +35,7 @@ class LSTM_Model():
         self.max_grad_norm=5.0
         self.target_names=ALL_TAGS
         self.target_names.append('unknown')
-
+        self.dataset_map={0:'umass',1:'combined',2:'heldout',3:'umass_heldout'}
         self.use_gpu=use_gpu
         self.do_test=do_test
         if self.use_gpu:
@@ -44,16 +46,30 @@ class LSTM_Model():
     def get_data(self):
         print "Unloading the dataset...."
         # data_zip=np.load('../../data/we_npy/combined_dataset.npz')
-        data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
-        self.X_train=data_zip['combined_X_train.npy']
-        self.y_train=data_zip['combined_y_train.npy']
-        self.X_valid=data_zip['combined_X_valid.npy']
-        self.y_valid=data_zip['combined_y_valid.npy']
-        self.X_test=data_zip['combined_X_test.npy']
-        self.y_test=data_zip['combined_y_test.npy']
+        if self.train_set==0:
+            print "UMass dataset...."
+            data_zip=np.load('../../data/we_npy_no_bio/umass_dataset.npz')
+            self.X_train=data_zip['X_train.npy']
+            self.y_train=data_zip['y_train.npy']
+            self.X_valid=data_zip['X_valid.npy']
+            self.y_valid=data_zip['y_valid.npy']
+            self.X_test=data_zip['X_test.npy']
+            self.y_test=data_zip['y_test.npy']
+        elif self.train_set==1:
+            print "Combined dataset...."
+            data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
+            self.X_train=data_zip['combined_X_train.npy']
+            self.y_train=data_zip['combined_y_train.npy']
+            self.X_valid=data_zip['combined_X_valid.npy']
+            self.y_valid=data_zip['combined_y_valid.npy']
+            self.X_test=data_zip['combined_X_test.npy']
+            self.y_test=data_zip['combined_y_test.npy']
+        final_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
+        self.X_final_test=final_zip['X_test']
+        self.y_final_test=final_zip['y_test']
 
         print "Loaded the dataset...."
-        print self.X_train.shape,self.X_valid.shape,self.X_test.shape,self.y_train.shape,self.y_valid.shape,self.y_test.shape
+        print self.X_train.shape,self.X_valid.shape,self.X_test.shape,self.y_train.shape,self.y_valid.shape,self.y_test.shape,self.X_final_test.shape,self.y_final_test.shape
         print "-"*40
 
     def make_model(self):
@@ -113,7 +129,7 @@ class LSTM_Model():
 
 
 
-    def test_epoch(self,data_x,data_y,final):
+    def test_epoch(self,data_x,data_y,final,plot_name):
 
         fetches = [self.accuracy, self.cost, self.label_pred]
         data_size = data_y.shape[0]
@@ -121,6 +137,8 @@ class LSTM_Model():
         feed_dict = {self.data:data_x, self.target:data_y, self.batch_size:data_size, self.keep_prob:1.0}
         _accs, _costs, _pred = self.sess.run(fetches, feed_dict)
         #F1 result
+        if final==True:
+            np.save('../../data/lstm_test_result_'+plot_name+'.npy',_pred,allow_pickle=False)
         _pred = np.argmax(_pred, axis = 2)
         pred = np.reshape(_pred,(1,-1))
         pred = np.squeeze(pred)
@@ -150,14 +168,14 @@ class LSTM_Model():
             plt.figure()
             plot_confusion_matrix(cm,classes=self.target_names[:-1],
                                   title='LSTM consusion matrix w/o normalization')
-            plt.savefig('lstm_cm_no_norm.png')
+            plt.savefig('lstm_cm_no_norm_'+plot_name+'.png')
 
             # Plot normalized confusion matrix
             plt.figure()
             plot_confusion_matrix(cm,classes=self.target_names[:-1],normalize=True,
                                   title='LSTM confusion matrix')
 
-            plt.savefig('lstm_cm_norm.png')
+            plt.savefig('lstm_cm_norm_'+plot_name+'.png')
 
         return _accs, _costs, _scores,out_dict
 
@@ -180,6 +198,7 @@ class LSTM_Model():
                     _costs = 0.0
                     _accs = 0.0
                     _lr = lrate*(decay_rate**(epoch/decay_num))
+                    self.X_train,self.y_train=shuffle(self.X_train,self.y_train,random_state=0)
                     for batch in xrange(tr_batch_num):
                         fetches = [self.accuracy, self.cost, self.train_op]
                         X_batch = self.X_train[batch*self.tr_batch_size:(batch+1)*self.tr_batch_size,:,:]
@@ -190,43 +209,65 @@ class LSTM_Model():
                         _costs += _cost
                     mean_acc = _accs / tr_batch_num
                     mean_cost = _costs / tr_batch_num
-                    #if (epoch+1)%display_num==0:
-                    print 'learning rate:',lrate,'decay_rate:',decay_rate
-                    print 'epoch',epoch+1
-                    print 'training %d, acc=%g, cost=%g '%(self.y_train.shape[0],mean_acc,mean_cost)
+                    if (epoch+1)%display_num==0:
+                        print 'learning rate:',lrate,'decay_rate:',decay_rate
+                        print 'epoch',epoch+1
+                        print 'training %d, acc=%g, cost=%g '%(self.y_train.shape[0],mean_acc,mean_cost)
                     if (epoch+1)>=self.epochs:
                         print '**VAL RESULT:'
-                        val_acc,val_cost,val_score,_=self.test_epoch(self.X_valid,self.y_valid,False)
-                        print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(self.y_valid.shape[0],val_acc,val_cost,val_score)
-                        self.all_results.append({'lr':lrate,'decay_rate':decay_rate,'epoch':epoch+1,'valAcc':val_acc,'valScore':val_score})
-                        if max_f1<val_score:
-                            max_f1=val_score
-                            self.bestModel=len(self.all_results)
-                        #save model
-                        save_path=self.saver.save(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lrate,decay_rate,epoch+1))
-
-        hparams={'lr':self.all_results[self.bestModel-1]['lr'],'d':self.all_results[self.bestModel-1]['decay_rate'],'epoch':self.all_results[self.bestModel-1]['epoch']}
-        update_results.update_params('LSTM',hparams)
-
-    def test_on_testset(self):
-        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as self.sess:
-            with open(PARAMS,'r') as res:
-                params=json.load(res)
-            lr,d,epoch=params['LSTM']['lr'],params['LSTM']['d'],params['LSTM']['epoch']
-            print 'lrate:',lr
-            print 'decay rate',d
-            print 'epochs',epoch
-            self.saver.restore(self.sess,self.model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(lr,d,epoch))
-            #evaluation the model on test set
-            test_acc,test_cost,test_score,out_dict=self.test_epoch(self.X_test,self.y_test,True)
-            print '**TEST RESULT:'
-            print '**TEST %d, acc=%g, cost=%g, F1 score = %g'%(self.y_test.shape[0],test_acc,test_cost,test_score)
-            print 'Updating the RESULTS file....'
+                        val_acc,val_cost,val_score,out_dict=self.test_epoch(self.X_valid,self.y_valid,final=False,plot_name=self.dataset_map[self.train_set])
             f1_scores=out_dict['f1-score'][:-1]
             support=out_dict['support'][:-1]
             updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
             updated_score=float("{0:.3f}".format(updated_score))
-            update_results.update_results('LSTM',updated_score)
+            #update_results.update_results('LSTM',self.dataset_map[self.train_set],updated_score)
+            print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(self.y_valid.shape[0],val_acc,val_cost,updated_score)
+            self.all_results.append({'lr':lrate,'decay_rate':decay_rate,'epoch':epoch+1,'valAcc':val_acc,'valScore':updated_score})
+            if max_f1<updated_score:
+                max_f1=updated_score
+                self.bestModel=len(self.all_results)
+            #save model
+            save_path=self.saver.save(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[self.train_set],lrate,decay_rate,epoch+1))
+
+        hparams={'lr':self.all_results[self.bestModel-1]['lr'],'d':self.all_results[self.bestModel-1]['decay_rate'],'epoch':self.all_results[self.bestModel-1]['epoch']}
+        update_results.update_params('LSTM',self.dataset_map[self.train_set],hparams)
+
+    def test_on_testset(self,data_x,data_y,dataset):
+        with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as self.sess:
+            with open(PARAMS,'r') as res:
+                params=json.load(res)
+            print "Dataset:",self.dataset_map[dataset]
+            if dataset==3:
+                idx=0
+            elif dataset==2:
+                idx=1
+            else:
+                idx=dataset
+            lr,d,epoch=params['LSTM'][self.dataset_map[idx]]['lr'],params['LSTM'][self.dataset_map[idx]]['d'],params['LSTM'][self.dataset_map[idx]]['epoch']
+            print 'lrate:',lr
+            print 'decay rate',d
+            print 'epochs',epoch
+            if dataset==2:
+                self.saver.restore(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[1],lr,d,epoch))
+            elif dataset==3:
+                self.saver.restore(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[0],lr,d,epoch))
+            else:
+                self.saver.restore(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[dataset],lr,d,epoch))
+            #evaluation the model on final test set
+            test_acc,test_cost,test_score,out_dict=self.test_epoch(data_x,data_y,final=True,plot_name=self.dataset_map[dataset])
+            #print '**TEST RESULT:'
+            #print '**TEST %d, acc=%g, cost=%g, F1 score = %g'%(data_y.shape[0],test_acc,test_cost,test_score)
+            #print 'Updating the RESULTS file....'
+            f1_scores=out_dict['f1-score'][:-1]
+            support=out_dict['support'][:-1]
+            updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
+            updated_score=float("{0:.3f}".format(updated_score))
+            update_results.update_results('LSTM',self.dataset_map[dataset],updated_score)
+            print "Updated score:",updated_score
+            print '**TEST RESULT:'
+            print '**TEST %d, acc=%g, cost=%g, F1 score = %g'%(data_y.shape[0],test_acc,test_cost,updated_score)
+            print 'Updating the RESULTS file....'
+
 
     def predict(self,data_x):
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as self.sess:
@@ -262,15 +303,16 @@ class LSTM_Model():
 
         if self.do_test==False:
             self.train()
-            self.test_on_testset()
+            self.test_on_testset(self.X_test,self.y_test,self.train_set)
         else:
-            self.test_on_testset()
+            self.test_on_testset(self.X_final_test,self.y_final_test,2)
+            # self.test_on_testset(self.X_test,self.y_test,0)
         # get_sample_citations()
         # self.predict(self.X_test[:5,:,:])
 
 
 
 
-model=LSTM_Model(use_gpu=False,do_test=False)
+model=LSTM_Model(1,use_gpu=False,do_test=True)
 model.run_lstm()
 

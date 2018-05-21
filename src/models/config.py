@@ -26,7 +26,7 @@ config_params={
 "word_embeddings" #20
 ],
 #Training params
-"epochs":10,
+"epochs":100,
 "lrate":1e-4,
 "lrate_decay":0.8,
 "do_bnorm":True,
@@ -130,7 +130,7 @@ SS_THRESHOLD=0.4
 
 EMD_SIZE=200
 
-# LR_RANGE=[1e-4,5e-4,1e-3,5e-3,1e-2]
-# DECAY_RATE=[0.8,0.85,0.9]
-LR_RANGE=[5e-3]
-DECAY_RATE=[0.9]
+LR_RANGE=[1e-4,5e-4,1e-3,5e-3,1e-2]
+DECAY_RATE=[0.8,0.85,0.9]
+#LR_RANGE=[5e-3]
+#DECAY_RATE=[0.9]
