@@ -305,7 +305,7 @@ class LSTM_Model():
             self.train()
             self.test_on_testset(self.X_test,self.y_test,self.train_set)
         else:
-            self.test_on_testset(self.X_final_test,self.y_final_test,2)
+            self.test_on_testset(self.X_final_test,self.y_final_test,2) # Replace self.X_final_test and self.y_final_test with self.X_test and self.y_test respectively to test on the umass or combined test sets respectively.
             # self.test_on_testset(self.X_test,self.y_test,0)
         # get_sample_citations()
         # self.predict(self.X_test[:5,:,:])

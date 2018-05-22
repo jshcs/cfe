@@ -47,9 +47,9 @@ DEV_FILE='../../data/umass_cfe/dev.docs'
 # TST_SENT_FILE='../../data/umass_tst_sentences.npy'
 # DEV_SENT_FILE='../../data/umass_dev_sentences.npy'
 
-TR_SENT_FILE='../../data/umass_tr_sentences_no_bio.npy'
-TST_SENT_FILE='../../data/umass_tst_sentences_no_bio.npy'
-DEV_SENT_FILE='../../data/umass_dev_sentences_no_bio.npy'
+TR_SENT_FILE='../../data/we_npy_no_bio/umass_tr_sentences_no_bio.npy'
+TST_SENT_FILE='../../data/we_npy_no_bio/umass_tst_sentences_no_bio.npy'
+DEV_SENT_FILE='../../data/we_npy_no_bio/umass_dev_sentences_no_bio.npy'
 
 
 SORTED_FPERSON_FNAME="../../data/sorted-person-first.txt"

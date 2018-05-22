@@ -44,7 +44,7 @@ styleFile = ['tfnlm','sageH']
 #output the train dictionary, val dictionary, test dictionary
 #dictionary[citation string][0] = list of tokens
 #dictionary[citation string][1] = index of label
-dataPath = '../../data/'
+dataPath = '../../data/bibtex_data/'
 
 
     

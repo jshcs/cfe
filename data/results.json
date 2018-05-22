@@ -1,1 +1,1 @@
-{"Bi-LSTM": 0, "LSTM": 0.323, "CRF": 0, "ID-CNN": 0.03141582002107396}
+{"Bi-LSTM": 0, "LSTM": {"umass": 0.957, "umass_heldout": 0.864, "heldout": 0.962, "combined": 0.968}, "CRF": 0, "ID-CNN": 0.03141582002107396}

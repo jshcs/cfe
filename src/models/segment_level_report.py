@@ -10,43 +10,27 @@ from sklearn.metrics import precision_recall_fscore_support
 #load the ground truth and predicted result
 #y_test is the ground truth and y_pred is the predict result, both are in token level, have not reshape and squeeze
 
-<<<<<<< HEAD
-###	heldout data
-#data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
-#y_test=data_zip['y_test']
-#y_pred=np.load('../../data/lstm_test_result_heldout.npy')
-
-### 	umass data
+### umass data
 #data_zip=np.load('../../data/we_npy_no_bio/umass_dataset.npz')
 #y_test=data_zip['y_test']
 #y_pred = np.load('../../data/lstm_test_result_umass.npy')
-
-###	combined test data
-data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
-y_test=data_zip['combined_y_test']
-y_pred=np.load('../../data/lstm_test_result_combined.npy')
 
 ###	umass_heldout
 #data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
 #y_test=data_zip['y_test']
 #y_pred=np.load('../../data/lstm_test_result_umass_heldout.npy')
 
-=======
-#load train-val-test data
-##data_zip=np.load('../../data/we_npy/combined_dataset.npz')
-##y_test=data_zip['combined_y_test.npy']
-##y_pred = np.load('combined_final_model/combined_test_result.npy')
 
-#load final test data
-data_zip=np.load('../../data/we_npy/final_test.npz')
-y_test=data_zip['y_test']
-y_pred = np.load('combined_final_model/unseen_test_result.npy')
+###	combined test data
+data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
+y_test=data_zip['combined_y_test']
+y_pred=np.load('../../data/lstm_test_result_combined.npy')
 
-#load umass test data
-##data_zip=np.load('../../data/we_npy/umass_dataset.npz')
-##y_test=data_zip['y_test']
-##y_pred = np.load('umass_final_model/umass_test_result.npy')
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
+###	heldout data
+#data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
+#y_test=data_zip['y_test']
+#y_pred=np.load('../../data/lstm_test_result_heldout.npy')
+
 
 print y_test.shape
 print y_pred.shape
@@ -210,15 +194,9 @@ out_dict={
             ,"support":clf_rep[3]
         }
 
-<<<<<<< HEAD
-print 'author precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
-=======
-f1_person = f1_score(person_truth,person_pred,average='weighted')
-prescision_person = precision_score(person_truth, person_pred, average='weighted') 
-recall_person = recall_score(person_truth, person_pred, average='weighted')  
 
-print 'author prescision', prescision_person,'recall', recall_person,'F1 score',f1_person
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
+print 'author precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
+
 
 
 #f1 score for title
@@ -228,7 +206,7 @@ title_truth = np.squeeze(title_truth)
 title_pred = np.squeeze(title_pred)
 #print 'title_truth',title_truth.shape,'title_pred',title_pred.shape
 
-<<<<<<< HEAD
+
 # f1_title = f1_score(title_truth,title_pred,average='micro')
 # prescision_title = precision_score(title_truth, title_pred, average='micro') 
 # recall_title = recall_score(title_truth, title_pred, average='micro')  
@@ -244,11 +222,7 @@ out_dict={
         }
 
 print 'title precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
-=======
-f1_title = f1_score(title_truth,title_pred,average='weighted')
-prescision_title = precision_score(title_truth, title_pred, average='weighted') 
-recall_title = recall_score(title_truth, title_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
+
 
 
 
@@ -259,7 +233,7 @@ journal_truth = np.squeeze(journal_truth)
 journal_pred = np.squeeze(journal_pred)
 #print 'title_truth',journal_truth.shape,'title_pred',journal_pred.shape
 
-<<<<<<< HEAD
+
 # f1_journal = f1_score(journal_truth,journal_pred,average='micro')
 # prescision_journal = precision_score(journal_truth, journal_pred, average='micro') 
 # recall_journal = recall_score(journal_truth, journal_pred, average='micro')  
@@ -275,12 +249,6 @@ out_dict={
         }
 
 print 'journal precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
-=======
-f1_journal = f1_score(journal_truth,journal_pred,average='weighted')
-prescision_journal = precision_score(journal_truth, journal_pred, average='weighted') 
-recall_journal = recall_score(journal_truth, journal_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
-
 
 
 #f1 score for year
@@ -297,7 +265,6 @@ year_pred = np.squeeze(year_pred)
 # print 'year prescision', prescision_year,'recall', recall_year,'F1 score',f1_year
 
 
-<<<<<<< HEAD
 clf_rep=precision_recall_fscore_support(year_truth,year_pred,average=averaging)
 out_dict={
             "precision":clf_rep[0].round(2)
@@ -305,11 +272,6 @@ out_dict={
             ,"f1-score":clf_rep[2].round(2)
             ,"support":clf_rep[3]
         }
-=======
-f1_year = f1_score(year_truth,year_pred,average='weighted')
-prescision_year = precision_score(year_truth, year_pred, average='weighted') 
-recall_year = recall_score(year_truth, year_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
 
 print 'year precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
 
@@ -321,7 +283,7 @@ volume_truth = np.squeeze(volume_truth)
 volume_pred = np.squeeze(volume_pred)
 #print 'volume_truth',volume_truth.shape,'volume_pred',volume_pred.shape
 
-<<<<<<< HEAD
+
 # f1_volume = f1_score(volume_truth,volume_pred,average='micro')
 # prescision_volume = precision_score(volume_truth, volume_pred, average='micro') 
 # recall_volume = recall_score(volume_truth, volume_pred, average='micro')  
@@ -336,11 +298,7 @@ out_dict={
             ,"f1-score":clf_rep[2].round(2)
             ,"support":clf_rep[3]
         }
-=======
-f1_volume = f1_score(volume_truth,volume_pred,average='weighted')
-prescision_volume = precision_score(volume_truth, volume_pred, average='weighted') 
-recall_volume = recall_score(volume_truth, volume_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
+
 
 print 'volume precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
 
@@ -351,18 +309,11 @@ pages_pred = np.reshape(y_seg_pred[:,5],(1,-1))
 pages_truth = np.squeeze(pages_truth)
 pages_pred = np.squeeze(pages_pred)
 #print 'pages_truth',pages_truth.shape,'pages_pred',pages_pred.shape
-
-<<<<<<< HEAD
 # f1_pages = f1_score(pages_truth,pages_pred,average='micro')
 # prescision_pages = precision_score(pages_truth, pages_pred, average='micro') 
 # recall_pages = recall_score(pages_truth, pages_pred, average='micro')  
 # 
 # print 'pages prescision', prescision_pages,'recall', recall_pages,'F1 score',f1_pages
-=======
-f1_pages = f1_score(pages_truth,pages_pred,average='weighted')
-prescision_pages = precision_score(pages_truth, pages_pred, average='weighted') 
-recall_pages = recall_score(pages_truth, pages_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
 
 
 clf_rep=precision_recall_fscore_support(pages_truth,pages_pred,average=averaging)
@@ -383,7 +334,7 @@ overall_truth = np.squeeze(overall_truth)
 overall_pred = np.squeeze(overall_pred)
 #print 'overall_truth',overall_truth.shape,'overall_pred',overall_pred.shape
 
-<<<<<<< HEAD
+
 # f1_overall = f1_score(overall_truth,overall_pred,average='micro')
 # prescision_overall = precision_score(overall_truth, overall_pred, average='micro') 
 # recall_overall = recall_score(overall_truth, overall_pred, average='micro')  
@@ -398,11 +349,6 @@ out_dict={
             ,"f1-score":clf_rep[2].round(2)
             ,"support":clf_rep[3]
         }
-=======
-f1_overall = f1_score(overall_truth,overall_pred,average='weighted')
-prescision_overall = precision_score(overall_truth, overall_pred, average='weighted') 
-recall_overall = recall_score(overall_truth, overall_pred, average='weighted')  
->>>>>>> 6b64aa515dae5f5c52ec5e997f1435611cfee66c
 
 print 'overall precision:\t', out_dict["precision"],'recall:\t', out_dict["recall"],'F1 score:\t',out_dict["f1-score"],'support:\t',out_dict["support"]
 

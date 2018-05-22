@@ -14,7 +14,7 @@ import itertools
 print 'start running'
 
 #loading data
-data_zip=np.load('../../data/we_npy/umass_dataset.npz')
+data_zip=np.load('../../data/we_npy_no_bio/umass_dataset.npz')
 X_train=data_zip['X_train.npy']
 y_train=data_zip['y_train.npy']
 X_valid=data_zip['X_valid.npy']
