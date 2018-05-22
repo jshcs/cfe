@@ -65,7 +65,6 @@ COMBINED_JNAMES="../../data/combined-journals.txt"
 
 DB_JNAMES="../../data/journal_db/db-journals.db"
 
-
 RAW_BIOTITLES="../../data/vocab.txt"
 BIO_SRT="../../data/bio-srt.pickle"
 BIO_TITLES="../../data/bio_titles.txt"
