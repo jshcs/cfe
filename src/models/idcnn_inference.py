@@ -4,13 +4,14 @@ from tensorflow.contrib.layers.python.layers import initializers
 from config import *
 import pickle
 from sklearn.metrics import f1_score
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report,precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-
+import update_results
+import json
 print 'start running'
 
 #loading data
@@ -21,12 +22,18 @@ X_valid=data_zip['X_valid.npy']
 y_valid=data_zip['y_valid.npy']
 X_test=data_zip['X_test.npy']
 y_test=data_zip['y_test.npy']
+dataset='umass'
+test_set='umass'
+# test_set='umass_heldout'
+# test_set='combined'
+# test_set='heldout'
 ##X_train=np.load('../../data/we_npy/combined_X_train.npy')
 ##y_train=np.load('../../data/we_npy/combined_y_train.npy')
 ##X_valid=np.load('../../data/we_npy/combined_X_valid.npy')
 ##y_valid=np.load('../../data/we_npy/combined_y_valid.npy')
 ##X_test=np.load('../../data/we_npy/combined_X_test.npy')
 ##y_test=np.load('../../data/we_npy/combined_y_test.npy')
+##dataset='combined'
 
 print 'input size'
 print X_train.shape,X_valid.shape,X_test.shape
@@ -178,7 +185,7 @@ def plot_confusion_matrix(cm, classes,
     
 #test on other data set (valid or test)
 ##test_batch_size = 100
-def testModule(data_x,data_y,final):
+def testModule(data_x,data_y,final,plot_name):
 ##    test_batch_num = data_x.shape[0]/test_batch_size
 ##    if data_x.shape[0]%test_batch_size>0:
 ##        test_batch_num = test_batch_num +1
@@ -199,23 +206,30 @@ def testModule(data_x,data_y,final):
     ground_truth = np.squeeze(ground_truth)
     _scores = f1_score(ground_truth,pred, average='weighted')
     print('classification report')
+    clf_rep=precision_recall_fscore_support(ground_truth,pred)
+    out_dict={
+            "precision":clf_rep[0].round(2)
+            ,"recall":clf_rep[1].round(2)
+            ,"f1-score":clf_rep[2].round(2)
+            ,"support":clf_rep[3]
+        }
     print(classification_report(ground_truth,pred,target_names=target_names))
     if final==True:
         cm=confusion_matrix(ground_truth,pred)
         print 'cm shape',cm.shape
         cm = cm[:len(labels),:len(labels)]
         print 'cm shape',cm.shape
-        df_cm = pd.DataFrame(cm, index = [i for i in target_names],
-                             columns = [i for i in target_names])
         plt.figure()
-        sn.heatmap(df_cm,annot=True)
-        plt.savefig('idcnnResultExclude.png')
-        plt.figure()
-        plot_confusion_matrix(cm, classes=target_names, normalize=True,
-                              title='ID-CNN confusion matrix')
-        plt.savefig('idcnnResultCom.png')
+        plot_confusion_matrix(cm,classes=target_names[:-1],
+                              title='ID-CNN confusion matrix w/o normalization')
+        plt.savefig('idcnn_cm_no_norm'+plot_name+'.png')
 
-    return _accs, _costs, _scores
+        plt.figure()
+        plot_confusion_matrix(cm, classes=target_names[:-1], normalize=True,
+                              title='ID-CNN confusion matrix')
+        plt.savefig('idcnn_cm_norm_'+plot_name+'.png')
+
+    return _accs, _costs, _scores,out_dict
 
 #begin to train
 batch_size = 50
@@ -228,6 +242,8 @@ saver = tf.train.Saver(max_to_keep=100)
 
 valResult = []
 bestScore = 0.0
+
+plot_name='umass'
 
 for l in LR_RANGE:
     for d in DECAY_RATE:
@@ -260,17 +276,26 @@ for l in LR_RANGE:
                     print 'learning rate:',l,'decay_rate:',d
                     print 'epoch',i+1
                     print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
-                if (i+1)>=100 and (i+1)%10==0:
+                if (i+1)>=epochs:
                     print '**VAL RESULT:'
-                    val_acc, val_cost,val_score = testModule(X_valid,y_valid,False)
-                    print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
-                    valResult.append({'lr':l,'decay_rate':d,'epoch':i+1,'valAcc':val_acc,'valScore':val_score})
-                    if bestScore<val_score:
-                        bestScore = val_score
+                    val_acc, val_cost,val_score,out_dict = testModule(X_valid,y_valid,final=False,plot_name=plot_name)
+                    f1_scores=out_dict['f1-score'][:-1]
+                    support=out_dict['support'][:-1]
+                    updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
+                    updated_score=float("{0:.3f}".format(updated_score))
+                    #update_results.update_results('LSTM',self.dataset_map[self.train_set],updated_score)
+                    print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(y_valid.shape[0],val_acc,val_cost,updated_score)
+
+                    #print '**VAL %d, acc=%g, cost=%g, F1 score = %g' % (y_valid.shape[0], val_acc, val_cost,val_score)
+                    valResult.append({'lr':lrate,'decay_rate':decay_rate,'epoch':i+1,'valAcc':val_acc,'valScore':updated_score})
+                    if bestScore<updated_score:
+                        bestScore = updated_score
                         bestModel = len(valResult)
                     #save model
-                    save_path = saver.save(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,d,i+1))
+                    save_path = saver.save(sess, model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(dataset,l,d,i+1))
 
+hparams={'lr':valResult[bestModel-1]['lr'],'d':valResult[bestModel-1]['decay_rate'],'epoch':valResult[bestModel-1]['epoch']}
+update_results.update_params('LSTM',dataset,hparams)
 for vRes in valResult:
     print vRes
     
@@ -278,24 +303,34 @@ for vRes in valResult:
 ##tf.reset_default_graph()
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     #get best model
-    l = valResult[bestModel-1]['lr']
-    dr = valResult[bestModel-1]['decay_rate']
-    i = valResult[bestModel-1]['epoch']
+    # l = valResult[bestModel-1]['lr']
+    # dr = valResult[bestModel-1]['decay_rate']
+    # i = valResult[bestModel-1]['epoch']
 ##    l = 0.00075
 ##    dr = 1
 ##    i = 120
-    print 'lrate:',l
-    print 'decay rate',dr
-    print 'epochs',i
-    print l,dr,i
-    saver.restore(sess, model_save_path+'-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+    with open(PARAMS,'r') as res:
+        params=json.load(res)
+    lr,d,epoch=params['LSTM'][dataset]['lr'],params['LSTM'][dataset]['d'],params['LSTM'][dataset]['epoch']
+    print 'lrate:',lr
+    print 'decay rate',d
+    print 'epochs',epoch
+    saver.restore(sess, model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(dataset,lr,d,epoch+1))
     #save model
-    save_path = saver.save(sess, 'final_model/idcnn-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
+    #save_path = saver.save(sess, 'final_model/idcnn-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
 
     #evaluation the model on test set
-    test_acc, test_cost,test_score = testModule(X_test,y_test,True)
-    print '**TEST RESULT:'
-    print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
-    
+    test_acc, test_cost,test_score,out_dict = testModule(X_test,y_test,final=True,plot_name=plot_name)
+    # print '**TEST RESULT:'
+    # print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
 
+    f1_scores=out_dict['f1-score'][:-1]
+    support=out_dict['support'][:-1]
+    updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
+    updated_score=float("{0:.3f}".format(updated_score))
+    update_results.update_results('LSTM',test_set,updated_score)
+    print "Updated score:",updated_score
+    print '**TEST RESULT:'
+    print '**TEST %d, acc=%g, cost=%g, F1 score = %g'%(y_test.shape[0],test_acc,test_cost,updated_score)
+    print 'Updating the RESULTS file....'
             

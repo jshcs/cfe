@@ -216,18 +216,18 @@ class LSTM_Model():
                     if (epoch+1)>=self.epochs:
                         print '**VAL RESULT:'
                         val_acc,val_cost,val_score,out_dict=self.test_epoch(self.X_valid,self.y_valid,final=False,plot_name=self.dataset_map[self.train_set])
-            f1_scores=out_dict['f1-score'][:-1]
-            support=out_dict['support'][:-1]
-            updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
-            updated_score=float("{0:.3f}".format(updated_score))
-            #update_results.update_results('LSTM',self.dataset_map[self.train_set],updated_score)
-            print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(self.y_valid.shape[0],val_acc,val_cost,updated_score)
-            self.all_results.append({'lr':lrate,'decay_rate':decay_rate,'epoch':epoch+1,'valAcc':val_acc,'valScore':updated_score})
-            if max_f1<updated_score:
-                max_f1=updated_score
-                self.bestModel=len(self.all_results)
-            #save model
-            save_path=self.saver.save(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[self.train_set],lrate,decay_rate,epoch+1))
+                        f1_scores=out_dict['f1-score'][:-1]
+                        support=out_dict['support'][:-1]
+                        updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
+                        updated_score=float("{0:.3f}".format(updated_score))
+                        #update_results.update_results('LSTM',self.dataset_map[self.train_set],updated_score)
+                        print '**VAL %d, acc=%g, cost=%g, F1 score = %g'%(self.y_valid.shape[0],val_acc,val_cost,updated_score)
+                        self.all_results.append({'lr':lrate,'decay_rate':decay_rate,'epoch':epoch+1,'valAcc':val_acc,'valScore':updated_score})
+                        if max_f1<updated_score:
+                            max_f1=updated_score
+                            self.bestModel=len(self.all_results)
+                        #save model
+                        save_path=self.saver.save(self.sess,self.model_save_path+'-mod_%s-lr_%g-dr_%g_ep%d.ckpt'%(self.dataset_map[self.train_set],lrate,decay_rate,epoch+1))
 
         hparams={'lr':self.all_results[self.bestModel-1]['lr'],'d':self.all_results[self.bestModel-1]['decay_rate'],'epoch':self.all_results[self.bestModel-1]['epoch']}
         update_results.update_params('LSTM',self.dataset_map[self.train_set],hparams)
