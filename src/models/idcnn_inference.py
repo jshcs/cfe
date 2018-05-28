@@ -243,7 +243,7 @@ saver = tf.train.Saver(max_to_keep=100)
 valResult = []
 bestScore = 0.0
 
-plot_name='umass'
+
 
 for l in LR_RANGE:
     for d in DECAY_RATE:
@@ -278,7 +278,7 @@ for l in LR_RANGE:
                     print 'training %d, acc=%g, cost=%g ' % (y_train.shape[0], mean_acc, mean_loss)
                 if (i+1)>=epochs:
                     print '**VAL RESULT:'
-                    val_acc, val_cost,val_score,out_dict = testModule(X_valid,y_valid,final=False,plot_name=plot_name)
+                    val_acc, val_cost,val_score,out_dict = testModule(X_valid,y_valid,final=False,plot_name=test_set)
                     f1_scores=out_dict['f1-score'][:-1]
                     support=out_dict['support'][:-1]
                     updated_score=sum([f1_scores[i]*support[i] for i in range(len(support))])/sum(support)
@@ -320,7 +320,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     #save_path = saver.save(sess, 'final_model/idcnn-lr_%g-dr_%g_ep%d.ckpt'%(l,dr,i))
 
     #evaluation the model on test set
-    test_acc, test_cost,test_score,out_dict = testModule(X_test,y_test,final=True,plot_name=plot_name)
+    test_acc, test_cost,test_score,out_dict = testModule(X_test,y_test,final=True,plot_name=test_set)
     # print '**TEST RESULT:'
     # print '**TEST %d, acc=%g, cost=%g, F1 score = %g' % (y_test.shape[0], test_acc, test_cost,test_score)
 
