@@ -66,25 +66,78 @@ def run_lstm(self):
 #data_zip=np.load('../../data/we_npy_no_bio/umass_dataset.npz')
 #y_test=data_zip['y_test']
 #y_pred = np.load('../../data/lstm_test_result_umass.npy')
+#y_pred = np.load('../../data/idcnn_test_result_umass.npy')
 ```
 ```
 ### Train on umass, test on heldout
 #data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
 #y_test=data_zip['y_test']
 #y_pred=np.load('../../data/lstm_test_result_umass_heldout.npy')
+#y_pred=np.load('../../data/idcnn_test_result_umass_heldout.npy')
 ```
 ```
 ### Train on combined, test on combined
 data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
 y_test=data_zip['combined_y_test']
 y_pred=np.load('../../data/lstm_test_result_combined.npy')
+#y_pred=np.load('../../data/idcnn_test_result_combined.npy')
 ```
 ```
 ### Train on combined, test on heldout
 #data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
 #y_test=data_zip['y_test']
 #y_pred=np.load('../../data/lstm_test_result_heldout.npy')
+#y_pred=np.load('../../data/idcnn_test_result_heldout.npy')
 ```
-Each of the above-mentioned segment of code in segment_level_report.py refers to one of the 4 experiments. Uncomment the necessary segment depending on the type of experiment. As shown above, the third segment is uncommented, and this will generate the segment-level scores on the combined test set, using the model trained on the combined training set.
+Each of the above-mentioned segment of code in segment_level_report.py refers to one of the 4 experiments. Uncomment the necessary segment depending on the type of experiment. Also, uncomment the test_result file corresponding to the idcnn model. As shown above, the third segment is uncommented and the test file corresponding to the idcnn model is commented, and this will generate the segment-level scores on the combined test set, using the idcnn model trained on the combined training set.
 
 10. All the scores are stored in data/results.json and all the optimal hyperparameter values are stored in data/params.json.  
+
+
+### IDCNN
+1. Make sure all the dependencies are installed. 
+2. Run make_ss_db.py to generate the simstring db files. 
+3. Initialize the dataset variable in idcnn_inference.py to either 'umass' or 'combined'. This will set the dataset used.
+4. Initialize the test_set variable in idcnn_inference.py to one of the 4 values: 
+```
+'umass'
+'umass_heldout'
+'combined'
+'heldout'
+```
+This is used to set the test set used for evaluation.
+
+5. Run idcnn_inference.py. This will give the token-level scores on the test set. This will also generate confusion matrix for the particular experiment. All the confusion matrices are stored as .png images in the same directory (src/). 
+
+6. To get segment-level F1 scores, run segment_level_report.py.
+```
+### Train on umass, test on umass
+#data_zip=np.load('../../data/we_npy_no_bio/umass_dataset.npz')
+#y_test=data_zip['y_test']
+#y_pred = np.load('../../data/lstm_test_result_umass.npy')
+#y_pred = np.load('../../data/idcnn_test_result_umass.npy')
+```
+```
+### Train on umass, test on heldout
+#data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
+#y_test=data_zip['y_test']
+#y_pred=np.load('../../data/lstm_test_result_umass_heldout.npy')
+#y_pred=np.load('../../data/idcnn_test_result_umass_heldout.npy')
+```
+```
+### Train on combined, test on combined
+data_zip=np.load('../../data/we_npy_no_bio/combined_dataset.npz')
+y_test=data_zip['combined_y_test']
+#y_pred=np.load('../../data/lstm_test_result_combined.npy')
+y_pred=np.load('../../data/idcnn_test_result_combined.npy')
+```
+```
+### Train on combined, test on heldout
+#data_zip=np.load('../../data/we_npy_no_bio/final_test.npz')
+#y_test=data_zip['y_test']
+#y_pred=np.load('../../data/lstm_test_result_heldout.npy')
+#y_pred=np.load('../../data/idcnn_test_result_heldout.npy')
+```
+Each of the above-mentioned segment of code in segment_level_report.py refers to one of the 4 experiments. Uncomment the necessary segment depending on the type of experiment. Also, uncomment the test_result file corresponding to the lstm model. As shown above, the third segment is uncommented and the test file corresponding to the lstm model is commented, and this will generate the segment-level scores on the combined test set, using the idcnn model trained on the combined training set.
+
+7. All the scores are stored in data/results.json and all the optimal hyperparameter values are stored in data/params.json.  
