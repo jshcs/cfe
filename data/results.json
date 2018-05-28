@@ -1,1 +1,1 @@
-{"Bi-LSTM": 0, "LSTM": {"umass": 0.957, "umass_heldout": 0.864, "heldout": 0.962, "combined": 0.968}, "CRF": 0, "ID-CNN": 0.03141582002107396}
+{"Bi-LSTM": {"umass": 0.97, "umass_heldout": 0.89, "heldout": 0.963, "combined": 0.982}, "LSTM": {"umass": 0.957, "umass_heldout": 0.864, "heldout": 0.962, "combined": 0.968}, "CRF": {"umass": 0.928, "umass_heldout": 0.792, "heldout": 0.922, "combined": 0.928}, "ID-CNN": {"umass": 0.975, "umass_heldout": 0.886, "combined": 0.986, "heldout": 0.945}}
